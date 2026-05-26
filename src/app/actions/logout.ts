@@ -78,25 +78,50 @@ export async function requestLogoutAndSubmitWork(formData: FormData) {
     fileType = file.type || 'application/octet-stream'
   }
 
-  // Create Logout Request
-  const { data: logoutRequest, error: lrError } = await supabase
+  // Check for existing logout request today
+  const { data: existingRequest } = await supabase
     .from('logout_requests')
-    .insert({
-      employee_id: user.id,
-      department_id: employee.department_id,
-      attendance_date: today,
-      approval_status: 'PENDING'
-    })
-    .select()
-    .single()
+    .select('id')
+    .eq('employee_id', user.id)
+    .eq('attendance_date', today)
+    .maybeSingle()
 
-  if (lrError) return { success: false, error: lrError.message }
+  let logoutRequestId: string
+
+  if (existingRequest) {
+    // Update existing to PENDING
+    const { error: updateError } = await supabase
+      .from('logout_requests')
+      .update({ approval_status: 'PENDING' })
+      .eq('id', existingRequest.id)
+    
+    if (updateError) return { success: false, error: updateError.message }
+    logoutRequestId = existingRequest.id
+
+    // Delete old work submissions to replace them
+    await supabase.from('work_submissions').delete().eq('logout_request_id', logoutRequestId)
+  } else {
+    // Insert new
+    const { data: newRequest, error: insertError } = await supabase
+      .from('logout_requests')
+      .insert({
+        employee_id: user.id,
+        department_id: employee.department_id,
+        attendance_date: today,
+        approval_status: 'PENDING'
+      })
+      .select()
+      .single()
+
+    if (insertError) return { success: false, error: insertError.message }
+    logoutRequestId = newRequest.id
+  }
 
   // Create Work Submission
   const { error: wsError } = await supabase
     .from('work_submissions')
     .insert({
-      logout_request_id: logoutRequest.id,
+      logout_request_id: logoutRequestId,
       employee_id: user.id,
       department_id: employee.department_id,
       work_comment: comment || null,
