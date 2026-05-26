@@ -299,5 +299,70 @@ export async function createAdminTask(formData: FormData) {
   })
 
   revalidatePath('/admin/tasks')
+}
+
+export async function escalateTask(taskId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: "Unauthorized" }
+
+  // Check if department owns the task
+  const { data: task } = await supabase.from('tasks').select('*, department_name:departments(name)').eq('id', taskId).single()
+  if (!task) return { success: false, error: "Task not found" }
+  if (task.department_id !== user.id) return { success: false, error: "Unauthorized: You do not own this task" }
+
+  const { error } = await supabase
+    .from('tasks')
+    .update({ is_escalated: true })
+    .eq('id', taskId)
+
+  if (error) return { success: false, error: error.message }
+
+  // Notify Admin
+  const { data: admins } = await supabase.from('admins').select('id')
+  if (admins) {
+    const notificationsToInsert = admins.map(a => ({
+      user_id: a.id,
+      title: '🚨 Task Escalated',
+      message: `Task '${task.task_title}' has been escalated to you by a department.`,
+      type: 'ESCALATION',
+      link_url: `/admin/tasks/${taskId}`
+    }))
+    await supabase.from('notifications').insert(notificationsToInsert)
+  }
+
+  revalidatePath('/department/tasks')
+  revalidatePath(`/department/tasks/${taskId}`)
+  revalidatePath('/admin/tasks')
+  revalidatePath(`/admin/tasks/${taskId}`)
+  revalidatePath('/employee/tasks')
+  revalidatePath(`/employee/tasks/${taskId}`)
+  
+  return { success: true }
+}
+
+export async function deescalateTask(taskId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: "Unauthorized" }
+
+  // Verify caller is an admin
+  const { data: adminCheck } = await supabase.from('admins').select('id').eq('id', user.id).maybeSingle()
+  if (!adminCheck) return { success: false, error: "Unauthorized: Admins only" }
+
+  const { error } = await supabase
+    .from('tasks')
+    .update({ is_escalated: false })
+    .eq('id', taskId)
+
+  if (error) return { success: false, error: error.message }
+
+  revalidatePath('/department/tasks')
+  revalidatePath(`/department/tasks/${taskId}`)
+  revalidatePath('/admin/tasks')
+  revalidatePath(`/admin/tasks/${taskId}`)
+  revalidatePath('/employee/tasks')
+  revalidatePath(`/employee/tasks/${taskId}`)
+  
   return { success: true }
 }

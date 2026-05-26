@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { PageHeader } from "@/components/custom/PageHeader"
-import { ArrowLeft, Calendar, AlignLeft, PlayCircle, CheckCircle2, Paperclip, Clock } from "lucide-react"
+import { ArrowLeft, Calendar, AlignLeft, PlayCircle, CheckCircle2, Paperclip, Clock, AlertOctagon } from "lucide-react"
 import Link from "next/link"
 import { TaskStatusBadge } from "@/components/tasks/TaskStatusBadge"
 import { PriorityBadge } from "@/components/tasks/PriorityBadge"
@@ -79,6 +79,16 @@ export default async function EmployeeTaskDetailsPage({ params }: { params: Prom
           <ArrowLeft className="w-4 h-4" />
           Back to Tasks
         </Link>
+
+        {task.is_escalated && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 shadow-sm flex gap-3">
+            <AlertOctagon className="w-6 h-6 text-red-600 shrink-0" />
+            <div>
+              <h4 className="font-bold text-red-900 mb-1">Task Escalated by Department</h4>
+              <p className="text-sm text-red-700">This task has been escalated to Admin review due to delays or critical issues. Please prioritize its completion or provide immediate updates in the discussion below.</p>
+            </div>
+          </div>
+        )}
 
         {task.task_status === 'REOPENED' && task.reopen_reason && (
           <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-xl text-orange-800 shadow-sm flex gap-3">

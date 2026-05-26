@@ -8,6 +8,8 @@ import { PriorityBadge } from "@/components/tasks/PriorityBadge"
 import { updateTaskStatus } from "@/app/actions/tasks"
 import { Button } from "@/components/ui/button"
 import { TaskCommentBox } from "@/components/tasks/TaskCommentBox"
+import { AlertOctagon } from "lucide-react"
+import { DeescalateTaskButton } from "@/components/tasks/DeescalateTaskButton"
 
 export default async function AdminTaskDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: taskId } = await params
@@ -106,10 +108,29 @@ export default async function AdminTaskDetailsPage({ params }: { params: Promise
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-4 sm:p-8">
       <div className="max-w-6xl mx-auto">
-        <Link href="/admin/tasks" className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900 mb-6 transition-colors">
-          <ArrowLeft className="w-4 h-4" />
-          Back to Tasks
-        </Link>
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <Link href="/admin/tasks" className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Tasks
+          </Link>
+          {task.is_escalated && (
+            <DeescalateTaskButton taskId={task.id} />
+          )}
+        </div>
+
+        {task.is_escalated && (
+          <div className="mb-8 p-4 bg-red-50 border border-red-200 dark:bg-red-900/20 dark:border-red-800/50 rounded-2xl flex items-start gap-4">
+            <div className="p-2 bg-red-100 dark:bg-red-900/40 text-red-600 rounded-xl">
+              <AlertOctagon className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-bold text-red-800 dark:text-red-400">Task Escalated by Department</h3>
+              <p className="text-sm text-red-600/80 dark:text-red-400/80 mt-1">
+                This task requires your immediate administrative attention. Once the blocking issues are resolved, you can remove this escalation flag.
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
           <div>

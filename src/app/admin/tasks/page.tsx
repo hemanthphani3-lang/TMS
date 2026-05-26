@@ -30,6 +30,7 @@ export default async function AdminTasksPage() {
       task_status,
       priority_level,
       due_date,
+      is_escalated,
       employees:assigned_employee_id (
         employee_name,
         profile_photo,

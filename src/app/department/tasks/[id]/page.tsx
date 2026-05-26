@@ -1,12 +1,13 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { ArrowLeft, Calendar, Clock, AlignLeft, CheckCircle2, RotateCcw } from "lucide-react"
+import { ArrowLeft, Calendar, Clock, AlignLeft, CheckCircle2, RotateCcw, AlertOctagon } from "lucide-react"
 import Link from "next/link"
 import { TaskStatusBadge } from "@/components/tasks/TaskStatusBadge"
 import { PriorityBadge } from "@/components/tasks/PriorityBadge"
 import { updateTaskStatus } from "@/app/actions/tasks"
 import { Button } from "@/components/ui/button"
 import { TaskCommentBox } from "@/components/tasks/TaskCommentBox"
+import { EscalateTaskButton } from "@/components/tasks/EscalateTaskButton"
 
 export default async function DepartmentTaskDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: taskId } = await params
@@ -108,10 +109,21 @@ export default async function DepartmentTaskDetailsPage({ params }: { params: Pr
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-4 sm:p-8">
       <div className="max-w-6xl mx-auto">
-        <Link href="/department/tasks" className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900 mb-6 transition-colors">
-          <ArrowLeft className="w-4 h-4" />
-          Back to Tasks
-        </Link>
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <Link href="/department/tasks" className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Tasks
+          </Link>
+
+          {!task.is_escalated ? (
+            <EscalateTaskButton taskId={task.id} />
+          ) : (
+            <div className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800/50 rounded-xl font-bold text-sm">
+              <AlertOctagon className="w-4 h-4" />
+              Escalated to Admin
+            </div>
+          )}
+        </div>
 
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
           <div>

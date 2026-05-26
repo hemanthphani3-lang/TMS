@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { PageHeader } from "@/components/custom/PageHeader"
-import { ListTodo, Calendar, PlayCircle, CheckCircle2 } from "lucide-react"
+import { ListTodo, Calendar, PlayCircle, CheckCircle2, AlertOctagon } from "lucide-react"
 import Link from "next/link"
 import { TaskStatusBadge } from "@/components/tasks/TaskStatusBadge"
 import { PriorityBadge } from "@/components/tasks/PriorityBadge"
@@ -87,7 +87,15 @@ export default async function EmployeeTasksPage() {
               <Link key={task.id} href={`/employee/tasks/${task.id}`} className="block group">
                 <div className="p-4 rounded-xl border border-slate-100 bg-white hover:border-[#0066FF] hover:shadow-md hover:shadow-[#0066FF]/5 transition-all">
                   <div className="flex items-start justify-between mb-3">
-                    <h4 className="font-bold text-slate-900 group-hover:text-[#0066FF] transition-colors line-clamp-1 pr-4">{task.task_title}</h4>
+                    <div className="flex flex-col gap-1 pr-4">
+                      <h4 className="font-bold text-slate-900 group-hover:text-[#0066FF] transition-colors line-clamp-1">{task.task_title}</h4>
+                      {task.is_escalated && (
+                        <span className="inline-flex items-center gap-1 w-max text-[10px] uppercase font-bold tracking-wider text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/30 px-2 py-0.5 rounded">
+                          <AlertOctagon className="w-3 h-3" />
+                          Escalated
+                        </span>
+                      )}
+                    </div>
                     <PriorityBadge priority={task.priority_level} />
                   </div>
                   <p className="text-sm text-slate-500 line-clamp-2 mb-4">

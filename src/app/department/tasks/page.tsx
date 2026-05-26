@@ -18,7 +18,7 @@ export default async function DepartmentTasksPage() {
 
   const { data: tasks } = await supabase
     .from('tasks')
-    .select('*, employees!assigned_employee_id(employee_name, profile_photo)')
+    .select('*, is_escalated, employees!assigned_employee_id(employee_name, profile_photo)')
     .eq('department_id', user!.id)
     .order('created_at', { ascending: false })
 

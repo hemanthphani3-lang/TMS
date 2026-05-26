@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { TaskStatusBadge } from "@/components/tasks/TaskStatusBadge"
 import { PriorityBadge } from "@/components/tasks/PriorityBadge"
-import { Calendar, ListTodo, Search } from "lucide-react"
+import { Calendar, ListTodo, Search, AlertOctagon } from "lucide-react"
 import { motion } from "framer-motion"
 
 interface Employee {
@@ -21,6 +21,7 @@ interface Task {
   priority_level: string
   due_date: string
   employees: Employee | null
+  is_escalated?: boolean
 }
 
 interface TasksTableProps {
@@ -79,7 +80,15 @@ export function TasksTable({ tasks, basePath = "/department/tasks" }: TasksTable
                     className="hover:bg-blue-50/50 dark:hover:bg-slate-700/50 transition-colors group cursor-pointer"
                   >
                     <td className="p-4">
-                      <p className="font-semibold text-slate-900 dark:text-white group-hover:text-[#0066FF] dark:group-hover:text-blue-400 transition-colors">{task.task_title}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-slate-900 dark:text-white group-hover:text-[#0066FF] dark:group-hover:text-blue-400 transition-colors">{task.task_title}</p>
+                        {task.is_escalated && (
+                          <span className="inline-flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/30 px-2 py-0.5 rounded">
+                            <AlertOctagon className="w-3 h-3" />
+                            Escalated
+                          </span>
+                        )}
+                      </div>
                       <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 line-clamp-1 max-w-md">{task.task_description}</p>
                     </td>
                     <td className="p-4">
