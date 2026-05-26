@@ -88,6 +88,15 @@ export async function createTask(formData: FormData) {
     action_description: `Task was created and assigned${files.length > 0 ? ` with ${files.length} attachment(s)` : ''}.`
   })
 
+  // Notify the assigned employee
+  await supabase.from('notifications').insert({
+    user_id: assigned_employee_id,
+    title: 'New Task Assigned',
+    message: `You have been assigned a new task: ${title}`,
+    type: 'TASK',
+    link_url: `/employee/tasks/${task.id}`
+  })
+
   revalidatePath('/department/tasks')
   redirect('/department/tasks')
 }
