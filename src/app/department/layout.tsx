@@ -3,7 +3,13 @@ import { createClient } from "@/lib/supabase/server"
 
 export default async function DepartmentLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch (error) {
+    console.error("Auth error in layout:", error)
+  }
 
   let pendingLeavesCount = 0
 
