@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 import { redirect } from "next/navigation"
 import { ArrowLeft, Calendar, Clock, AlignLeft, CheckCircle2, RotateCcw } from "lucide-react"
 import Link from "next/link"
@@ -20,6 +21,11 @@ export default async function AdminTaskDetailsPage({ params }: { params: Promise
 
   if (!user) redirect('/login')
 
+  const supabaseAdmin = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
   // Fetch task, comments, activity logs in parallel
   let task = null
   let rawComments = []
@@ -27,17 +33,17 @@ export default async function AdminTaskDetailsPage({ params }: { params: Promise
 
   try {
     const results = await Promise.all([
-      supabase
+      supabaseAdmin
         .from('tasks')
         .select('*, employees!assigned_employee_id(*, departments(department_name))')
         .eq('id', taskId)
         .maybeSingle(),
-      supabase
+      supabaseAdmin
         .from('task_comments')
         .select('id, comment_text, created_at, user_id')
         .eq('task_id', taskId)
         .order('created_at', { ascending: true }),
-      supabase
+      supabaseAdmin
         .from('task_activity_logs')
         .select('*')
         .eq('task_id', taskId)

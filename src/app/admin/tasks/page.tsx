@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 import { redirect } from "next/navigation"
 import { PageHeader } from "@/components/custom/PageHeader"
 import { TasksTable } from "@/app/department/tasks/TasksTable"
@@ -14,8 +15,13 @@ export default async function AdminTasksPage() {
 
   if (!user) redirect("/login")
 
+  const supabaseAdmin = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
   // Fetch all tasks globally
-  const { data: tasks, error } = await supabase
+  const { data: tasks, error } = await supabaseAdmin
     .from('tasks')
     .select(`
       id,
