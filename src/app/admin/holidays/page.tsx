@@ -76,7 +76,7 @@ export default async function AdminHolidaysPage() {
                         <h4 className="font-bold text-slate-900">{holiday.holiday_name}</h4>
                         <div className="flex items-center gap-2 text-sm text-slate-500 mt-1">
                           <CalendarIcon className="w-4 h-4" />
-                          <span>{new Date(holiday.holiday_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                          <span>{new Date(holiday.holiday_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Kolkata' })}</span>
                         </div>
                       </div>
                     </div>

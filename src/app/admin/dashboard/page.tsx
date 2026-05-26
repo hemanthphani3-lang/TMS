@@ -130,7 +130,7 @@ export default async function AdminDashboard(props: { searchParams: Promise<{ [k
     const dayRecords = Array.from(new Map(dayRecordsRaw.map(a => [a.employee_id, a])).values())
     const present = dayRecords.filter(a => ['PRESENT', 'HALF_DAY', 'LATE'].includes(a.attendance_status)).length
     return {
-      date: new Date(date).toLocaleDateString('en-US', { weekday: 'short' }),
+      date: new Date(date).toLocaleDateString('en-US', { weekday: 'short', timeZone: 'Asia/Kolkata' }),
       present: present,
       absent: Math.max(0, totalEmployees - present)
     }

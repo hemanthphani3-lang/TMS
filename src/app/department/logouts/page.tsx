@@ -46,7 +46,7 @@ export default async function LogoutApprovalsPage() {
         ) : (
           requests?.map((req) => {
             const submission = req.work_submissions?.[0]
-            const requestTime = new Date(req.logout_request_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+            const requestTime = new Date(req.logout_request_time).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' })
 
             return (
               <Card key={req.id} className="p-6 rounded-2xl border-slate-200 shadow-sm bg-white hover:shadow-md transition-shadow">

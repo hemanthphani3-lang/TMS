@@ -121,7 +121,7 @@ export default async function DepartmentTaskDetailsPage({ params }: { params: Pr
               <PriorityBadge priority={task.priority_level} />
               <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600 bg-white px-3 py-1.5 rounded-full border border-slate-200">
                 <Calendar className="w-4 h-4 text-slate-400" />
-                Due: {new Date(task.due_date).toLocaleDateString()}
+                Due: {new Date(task.due_date).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}
               </div>
             </div>
           </div>
@@ -207,7 +207,7 @@ export default async function DepartmentTaskDetailsPage({ params }: { params: Pr
                     <div key={log.id} className="p-3 rounded-lg border border-slate-100 bg-slate-50">
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-bold text-slate-800 text-xs">{log.action_type.replace(/_/g, ' ')}</span>
-                        <time className="text-[10px] text-slate-500">{new Date(log.created_at).toLocaleDateString()}</time>
+                        <time className="text-[10px] text-slate-500">{new Date(log.created_at).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}</time>
                       </div>
                       <p className="text-xs text-slate-600">{log.action_description}</p>
                     </div>

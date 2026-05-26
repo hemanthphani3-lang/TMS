@@ -123,7 +123,7 @@ export function RealtimeLeaderboard({
       <div className="flex items-center justify-end gap-1.5 mt-2 px-1">
         <RefreshCw className={`w-3 h-3 text-slate-400 ${pulse ? 'animate-spin' : ''}`} />
         <span suppressHydrationWarning className="text-[11px] text-slate-400">
-          Updated {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+          Updated {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Kolkata' })}
         </span>
       </div>
     </div>

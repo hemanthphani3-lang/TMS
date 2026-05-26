@@ -98,7 +98,7 @@ export default async function EmployeeTaskDetailsPage({ params }: { params: Prom
               <PriorityBadge priority={task.priority_level} />
               <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600 bg-white px-3 py-1.5 rounded-full border border-slate-200">
                 <Calendar className="w-4 h-4 text-slate-400" />
-                Due: {new Date(task.due_date).toLocaleDateString()}
+                Due: {new Date(task.due_date).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}
               </div>
             </div>
           </div>
@@ -188,7 +188,7 @@ export default async function EmployeeTaskDetailsPage({ params }: { params: Prom
                     <div className="w-[calc(100%-2rem)] md:w-[calc(50%-1.5rem)] p-3 rounded-lg border border-slate-100 bg-white shadow-sm">
                       <div className="flex items-center justify-between space-x-2 mb-1">
                         <div className="font-bold text-slate-900 text-[10px]">{log.action_type.replace('_', ' ')}</div>
-                        <time className="text-[9px] text-slate-500">{new Date(log.created_at).toLocaleDateString()}</time>
+                        <time className="text-[9px] text-slate-500">{new Date(log.created_at).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}</time>
                       </div>
                       <div className="text-xs text-slate-600 line-clamp-2">{log.action_description}</div>
                     </div>

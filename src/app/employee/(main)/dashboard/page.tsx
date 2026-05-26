@@ -84,7 +84,7 @@ export default async function EmployeeDashboard() {
         <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-xl border border-slate-100 shadow-sm">
           <Calendar className="w-5 h-5 text-blue-600" />
           <span className="font-semibold text-slate-700">
-            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'Asia/Kolkata' })}
           </span>
         </div>
       </div>
@@ -111,7 +111,7 @@ export default async function EmployeeDashboard() {
                 <>
                   <p className="text-sm text-slate-500">Check-in Time</p>
                   <p className="font-mono text-lg font-bold text-slate-900">
-                    {new Date(attendance.check_in_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(attendance.check_in_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' })}
                   </p>
                 </>
               )}
@@ -184,7 +184,7 @@ export default async function EmployeeDashboard() {
                     </div>
                     <div>
                       <p className="font-semibold text-slate-900">{task.task_title}</p>
-                      <p className="text-xs font-medium text-slate-500">Due: {new Date(task.due_date).toLocaleDateString()}</p>
+                      <p className="text-xs font-medium text-slate-500">Due: {new Date(task.due_date).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}</p>
                     </div>
                   </div>
                   <span className="text-[10px] uppercase font-bold tracking-wider px-3 py-1 rounded-full bg-slate-200 text-slate-700">
@@ -211,7 +211,7 @@ export default async function EmployeeDashboard() {
                     <div className="flex-1">
                       <div className="flex justify-between items-start">
                         <p className="font-semibold text-slate-900">
-                          {request.attendance_date === today ? "Today's Submission" : new Date(request.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          {request.attendance_date === today ? "Today's Submission" : new Date(request.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'Asia/Kolkata' })}
                         </p>
                         <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase ${request.approval_status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700' : request.approval_status === 'REJECTED' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
                           {request.approval_status}

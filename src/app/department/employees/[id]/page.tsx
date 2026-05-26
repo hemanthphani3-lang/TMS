@@ -83,7 +83,7 @@ export default async function EmployeeDetailsPage({ params }: { params: Promise<
             </div>
             <div className="flex items-center gap-3 text-sm text-slate-600">
               <Calendar className="w-4 h-4 text-slate-400" />
-              <span>Joined: <strong className="text-slate-900">{new Date(employee.joining_date).toLocaleDateString()}</strong></span>
+              <span>Joined: <strong className="text-slate-900">{new Date(employee.joining_date).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}</strong></span>
             </div>
           </div>
         </div>

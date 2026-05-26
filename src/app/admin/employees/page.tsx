@@ -103,7 +103,7 @@ export default async function AdminEmployeesPage() {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600">
                           <Calendar className="w-4 h-4 text-slate-400" />
-                          {new Date(emp.joining_date).toLocaleDateString()}
+                          {new Date(emp.joining_date).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}
                         </div>
                       </td>
                     </tr>

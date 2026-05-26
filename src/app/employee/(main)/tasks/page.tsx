@@ -97,7 +97,7 @@ export default async function EmployeeTasksPage() {
                     <TaskStatusBadge status={task.task_status} />
                     <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 bg-slate-50 px-2 py-1 rounded-md">
                       <Calendar className="w-3.5 h-3.5" />
-                      {new Date(task.due_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                      {new Date(task.due_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', timeZone: 'Asia/Kolkata' })}
                     </div>
                   </div>
                 </div>
@@ -132,7 +132,7 @@ export default async function EmployeeTasksPage() {
                     <TaskStatusBadge status={task.task_status} />
                     <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 bg-white border border-slate-200 px-2 py-1 rounded-md">
                       <Calendar className="w-3.5 h-3.5" />
-                      {new Date(task.due_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                      {new Date(task.due_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', timeZone: 'Asia/Kolkata' })}
                     </div>
                   </div>
                 </div>

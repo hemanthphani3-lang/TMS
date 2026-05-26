@@ -82,7 +82,7 @@ export default async function DepartmentDashboard() {
     const dayRecords = Array.from(new Map(dayRecordsRaw.map(a => [a.employee_id, a])).values())
     const present = dayRecords.filter(a => ['PRESENT', 'HALF_DAY', 'LATE'].includes(a.attendance_status)).length
     return {
-      date: new Date(date).toLocaleDateString('en-US', { weekday: 'short' }),
+      date: new Date(date).toLocaleDateString('en-US', { weekday: 'short', timeZone: 'Asia/Kolkata' }),
       present,
       absent: Math.max(0, totalEmployees - present)
     }
@@ -244,7 +244,7 @@ export default async function DepartmentDashboard() {
                       </div>
                       <div className="text-right flex flex-col items-end gap-1">
                         <p className="font-mono text-sm text-slate-700">
-                          {new Date(record.check_in_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(record.check_in_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' })}
                         </p>
                         <div className="flex items-center gap-2">
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${record.attendance_status === 'LATE' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>

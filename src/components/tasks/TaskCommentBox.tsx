@@ -149,9 +149,9 @@ export function TaskCommentBox({
                     {comment.comment_text}
                   </div>
                   <span suppressHydrationWarning className="text-[10px] text-slate-400 mt-1 mx-1">
-                    {new Date(comment.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    {new Date(comment.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" })}
                     {" · "}
-                    {new Date(comment.created_at).toLocaleDateString([], { day: "numeric", month: "short" })}
+                    {new Date(comment.created_at).toLocaleDateString([], { day: "numeric", month: "short", timeZone: "Asia/Kolkata" })}
                   </span>
                 </div>
               </div>

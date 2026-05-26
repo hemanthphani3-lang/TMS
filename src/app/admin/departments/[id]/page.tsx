@@ -181,7 +181,7 @@ export default async function DepartmentBreakdownPage({ params }: { params: Prom
                   <div className="text-right flex items-center gap-4">
                     {record && (
                       <p className="font-mono text-sm text-slate-700">
-                        {new Date(record.check_in_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(record.check_in_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' })}
                       </p>
                     )}
                     <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider ${

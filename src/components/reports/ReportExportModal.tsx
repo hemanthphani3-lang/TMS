@@ -115,7 +115,7 @@ export function ReportExportModal({ role, departmentId, employeeId }: ReportExpo
         doc.setFontSize(20)
         doc.text(`InnoVibe ${type} Report`, 14, 22)
         doc.setFontSize(11)
-        doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30)
+        doc.text(`Generated on: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`, 14, 30)
         doc.text(`Role: ${role}`, 14, 36)
 
         const headers = Object.keys(data[0])
