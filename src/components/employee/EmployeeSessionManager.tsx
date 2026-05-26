@@ -20,17 +20,20 @@ export function EmployeeSessionManager({ children, links }: { children: React.Re
       const nowMs = new Date()
       const istOffset = 5.5 * 60 * 60 * 1000
       const todayIST = new Date(nowMs.getTime() + istOffset).toISOString().split('T')[0]
+      const startUTC = new Date(`${todayIST}T00:00:00+05:30`).toISOString()
+      const endUTC = new Date(`${todayIST}T23:59:59+05:30`).toISOString()
 
       const { data } = await supabase
-        .from('logout_requests')
-        .select('approval_status')
+        .from('attendance')
+        .select('work_status')
         .eq('employee_id', userId)
-        .eq('attendance_date', todayIST)
+        .gte('created_at', startUTC)
+        .lte('created_at', endUTC)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle()
 
-      if (data?.approval_status === 'APPROVED') {
+      if (data?.work_status === 'LOGGED_OUT') {
         router.push('/employee/identity-check')
         router.refresh()
       }
