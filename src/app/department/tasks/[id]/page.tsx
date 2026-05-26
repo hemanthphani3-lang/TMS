@@ -118,21 +118,23 @@ export default async function DepartmentTaskDetailsPage({ params }: { params: Pr
           </div>
 
           {/* Department Approval/Reopen Actions */}
-          {task.task_status === 'WAITING_APPROVAL' && (
-            <div className="flex items-center gap-3 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
+          {(task.task_status === 'WAITING_APPROVAL' || task.task_status === 'COMPLETED') && (
+            <div className="flex items-center gap-3 bg-white dark:bg-slate-800 p-2 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+              {task.task_status === 'WAITING_APPROVAL' && (
+                <form action={async () => {
+                  "use server"
+                  await updateTaskStatus(task.id, 'COMPLETED')
+                }}>
+                  <Button type="submit" className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl px-6">
+                    <CheckCircle2 className="w-4 h-4 mr-2" /> Approve as Complete
+                  </Button>
+                </form>
+              )}
               <form action={async () => {
                 "use server"
-                await updateTaskStatus(task.id, 'COMPLETED')
+                await updateTaskStatus(task.id, 'REOPENED', 'Task was reopened by department after review.')
               }}>
-                <Button type="submit" className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl px-6">
-                  <CheckCircle2 className="w-4 h-4 mr-2" /> Approve as Complete
-                </Button>
-              </form>
-              <form action={async () => {
-                "use server"
-                await updateTaskStatus(task.id, 'REOPENED', 'Work was rejected by department.')
-              }}>
-                <Button type="submit" variant="outline" className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-200 rounded-xl px-6">
+                <Button type="submit" variant="outline" className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/20 border-orange-200 dark:border-orange-800/50 rounded-xl px-6">
                   <RotateCcw className="w-4 h-4 mr-2" /> Reopen Task
                 </Button>
               </form>
