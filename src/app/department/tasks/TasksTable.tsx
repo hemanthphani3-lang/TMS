@@ -10,6 +10,7 @@ import { motion } from "framer-motion"
 interface Employee {
   employee_name: string
   profile_photo: string | null
+  departments?: { department_name: string } | null
 }
 
 interface Task {
@@ -91,7 +92,12 @@ export function TasksTable({ tasks, basePath = "/department/tasks" }: TasksTable
                             {emp?.employee_name?.charAt(0) || '?'}
                           </div>
                         )}
-                        <span className="font-medium text-slate-700 dark:text-slate-300">{emp?.employee_name}</span>
+                        <div className="flex flex-col">
+                          <span className="font-medium text-slate-700 dark:text-slate-300">{emp?.employee_name}</span>
+                          {emp?.departments?.department_name && (
+                            <span className="text-[10px] text-slate-500">{emp.departments.department_name}</span>
+                          )}
+                        </div>
                       </div>
                     </td>
                     <td className="p-4">

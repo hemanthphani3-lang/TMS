@@ -26,7 +26,8 @@ export default async function AdminTasksPage() {
       due_date,
       employees:assigned_employee_id (
         employee_name,
-        profile_photo
+        profile_photo,
+        departments ( department_name )
       )
     `)
     .order('created_at', { ascending: false })

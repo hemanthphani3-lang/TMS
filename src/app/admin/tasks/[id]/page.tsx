@@ -29,7 +29,7 @@ export default async function AdminTaskDetailsPage({ params }: { params: Promise
     const results = await Promise.all([
       supabase
         .from('tasks')
-        .select('*, employees!assigned_employee_id(*)')
+        .select('*, employees!assigned_employee_id(*, departments(department_name))')
         .eq('id', taskId)
         .maybeSingle(),
       supabase
@@ -63,7 +63,7 @@ export default async function AdminTaskDetailsPage({ params }: { params: Promise
     )
   }
 
-  const emp = task.employees as unknown as { id: string, employee_name: string, profile_photo: string | null, designation: string }
+  const emp = task.employees as unknown as { id: string, employee_name: string, profile_photo: string | null, designation: string, departments?: { department_name: string } }
 
   // Collect all unique commenter IDs (excluding current user)
   const commenterIds = [...new Set((rawComments || []).map(c => c.user_id).filter(id => id !== user!.id))]
@@ -183,6 +183,9 @@ export default async function AdminTaskDetailsPage({ params }: { params: Promise
                 <div>
                   <p className="font-semibold text-slate-900">{emp?.employee_name}</p>
                   <p className="text-sm text-slate-500">{emp?.designation}</p>
+                  {emp?.departments?.department_name && (
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mt-0.5">{emp.departments.department_name}</p>
+                  )}
                 </div>
               </div>
             </div>
