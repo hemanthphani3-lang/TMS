@@ -10,7 +10,7 @@ const employeeLinks = [
   { label: "Announcements", href: "/employee/announcements", iconName: "megaphone" },
   { label: "Reports", href: "/employee/reports", iconName: "file" },
   { label: "Notifications", href: "/employee/notifications", iconName: "bell" },
-  { label: "Settings", href: "/employee/settings", iconName: "settings" },
+  { label: "Profile", href: "/employee/profile", iconName: "profile" },
 ]
 
 export default async function EmployeeLayout({ children }: { children: React.ReactNode }) {
