@@ -30,11 +30,19 @@ export function AdminCreateTaskForm({ employees }: { employees: Employee[] }) {
   // Determine file names for display if files selected
   const [fileNames, setFileNames] = useState<string[]>([])
   
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("")
+  
   // Format employees to show their department correctly
   const formattedEmployees = employees.map(emp => ({
     ...emp,
     deptName: emp.departments ? (Array.isArray(emp.departments) ? emp.departments[0].department_name : emp.departments.department_name) : "Unknown Dept"
   }))
+
+  const uniqueDepartments = Array.from(new Map(formattedEmployees.map(emp => [emp.department_id, { id: emp.department_id, name: emp.deptName }])).values())
+  
+  const filteredEmployees = selectedDepartmentId 
+    ? formattedEmployees.filter(emp => emp.department_id === selectedDepartmentId)
+    : formattedEmployees
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -97,26 +105,48 @@ export function AdminCreateTaskForm({ employees }: { employees: Employee[] }) {
               </div>
             )}
             
-            {/* Employee Dropdown */}
-            <div className="space-y-2 pb-4 border-b border-slate-100 dark:border-slate-700">
-              <Label htmlFor="assigned_employee_id" className="flex items-center gap-2 dark:text-slate-200">
-                <Users className="w-4 h-4 text-[#0066FF]" />
-                Assign to Employee
-              </Label>
-              <select
-                id="assigned_employee_id"
-                name="assigned_employee_id"
-                required
-                defaultValue=""
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 outline-none focus:ring-2 focus:ring-[#0066FF]/20 transition-all text-sm font-medium text-slate-700 dark:text-slate-300"
-              >
-                <option value="" disabled>Select an employee...</option>
-                {formattedEmployees.map((emp) => (
-                  <option key={emp.id} value={emp.id}>
-                    {emp.employee_name} ({emp.employee_code}) — {emp.deptName}
-                  </option>
-                ))}
-              </select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4 border-b border-slate-100 dark:border-slate-700">
+              {/* Department Dropdown (Filter) */}
+              <div className="space-y-2">
+                <Label htmlFor="department_filter" className="flex items-center gap-2 dark:text-slate-200">
+                  <Users className="w-4 h-4 text-[#0066FF]" />
+                  Filter by Department
+                </Label>
+                <select
+                  id="department_filter"
+                  value={selectedDepartmentId}
+                  onChange={(e) => setSelectedDepartmentId(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 outline-none focus:ring-2 focus:ring-[#0066FF]/20 transition-all text-sm font-medium text-slate-700 dark:text-slate-300"
+                >
+                  <option value="">All Departments</option>
+                  {uniqueDepartments.map((dept) => (
+                    <option key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Employee Dropdown */}
+              <div className="space-y-2">
+                <Label htmlFor="assigned_employee_id" className="flex items-center gap-2 dark:text-slate-200">
+                  Assign to Employee
+                </Label>
+                <select
+                  id="assigned_employee_id"
+                  name="assigned_employee_id"
+                  required
+                  defaultValue=""
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 outline-none focus:ring-2 focus:ring-[#0066FF]/20 transition-all text-sm font-medium text-slate-700 dark:text-slate-300"
+                >
+                  <option value="" disabled>Select an employee...</option>
+                  {filteredEmployees.map((emp) => (
+                    <option key={emp.id} value={emp.id}>
+                      {emp.employee_name} ({emp.employee_code})
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div className="space-y-2">
