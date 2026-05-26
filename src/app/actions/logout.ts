@@ -131,12 +131,6 @@ export async function requestLogoutAndSubmitWork(formData: FormData) {
 
   if (wsError) return { success: false, error: wsError.message }
 
-  // Update Attendance Status
-  await supabase
-    .from('attendance')
-    .update({ work_status: 'LOGOUT_REQUESTED' })
-    .eq('id', attendance.id)
-
   revalidatePath('/employee/dashboard')
   return { success: true }
 }

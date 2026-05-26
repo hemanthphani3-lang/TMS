@@ -71,6 +71,9 @@ export default async function EmployeeDashboard() {
   const isCheckedIn = attendance && attendance.work_status !== 'LOGGED_OUT'
   const departmentName = (employee?.departments as { department_name: string } | null)?.department_name || "Unassigned"
 
+  const todayRequest = logoutRequests?.find(req => req.attendance_date === todayIST)
+  const isLogoutPending = todayRequest?.approval_status === 'PENDING' || attendance?.work_status === 'LOGOUT_REQUESTED'
+
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
@@ -99,7 +102,7 @@ export default async function EmployeeDashboard() {
               <div>
                 <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">Current Status</p>
                 <h3 className="text-2xl font-black text-[#0A1A2F]">
-                  {isCheckedIn ? attendance.work_status.replace(/_/g, ' ') : 'NOT CHECKED IN'}
+                  {isCheckedIn ? (isLogoutPending ? 'PENDING LOGOUT' : attendance.work_status.replace(/_/g, ' ')) : 'NOT CHECKED IN'}
                 </h3>
               </div>
             </div>

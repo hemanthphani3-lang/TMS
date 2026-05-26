@@ -73,12 +73,22 @@ export function EmployeeSessionManager({ children, links }: { children: React.Re
     } else if (attendance.work_status === 'LOGGED_OUT') {
       // Already officially logged out → go to identity check to re-check-in
       router.push('/employee/identity-check')
-    } else if (attendance.work_status === 'LOGOUT_REQUESTED') {
-      // Already requested
-      alert("Your logout request is currently pending. Please wait for your department to approve it.")
     } else {
-      // Active session → must submit work
-      setShowModal(true)
+      // Check if there is already a pending logout request for today
+      const { data: pendingReq } = await supabase
+        .from('logout_requests')
+        .select('id')
+        .eq('employee_id', user.id)
+        .eq('attendance_date', todayIST)
+        .eq('approval_status', 'PENDING')
+        .maybeSingle()
+
+      if (pendingReq || attendance.work_status === 'LOGOUT_REQUESTED') {
+        alert("Your logout request is currently pending. Please wait for your department to approve it.")
+      } else {
+        // Active session → must submit work
+        setShowModal(true)
+      }
     }
   }
 
