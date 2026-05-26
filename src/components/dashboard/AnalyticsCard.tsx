@@ -1,7 +1,5 @@
-"use client"
-
 import { LucideIcon } from "lucide-react"
-import { motion } from "framer-motion"
+import { MotionCard } from "@/components/custom/MotionCard"
 
 interface AnalyticsCardProps {
   title: string
@@ -23,7 +21,7 @@ export function AnalyticsCard({
   delay = 0
 }: AnalyticsCardProps) {
   return (
-    <motion.div 
+    <MotionCard 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: delay * 0.1, ease: "easeOut" }}
@@ -41,6 +39,6 @@ export function AnalyticsCard({
       {subtitle && (
         <p className="text-xs font-medium text-slate-400">{subtitle}</p>
       )}
-    </motion.div>
+    </MotionCard>
   )
 }
