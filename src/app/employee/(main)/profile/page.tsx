@@ -16,13 +16,29 @@ export default async function EmployeeProfilePage() {
 
   if (!user) redirect("/login")
 
-  const { data: emp } = await supabase
+  // First try by auth user ID (primary link)
+  let { data: emp } = await supabase
     .from('employees')
     .select('*, departments(department_name)')
-    .eq('id', user.id)
-    .single()
+    .eq('id', user!.id)
+    .maybeSingle()
 
-  if (!emp) return <div>Profile not found</div>
+  // Fallback: try by email (handles edge cases)
+  if (!emp && user?.email) {
+    const { data: empByEmail } = await supabase
+      .from('employees')
+      .select('*, departments(department_name)')
+      .eq('employee_email', user.email)
+      .maybeSingle()
+    emp = empByEmail
+  }
+
+  if (!emp) return (
+    <div className="p-8 text-center text-slate-500">
+      <p className="font-semibold">Employee profile not found.</p>
+      <p className="text-sm mt-1">Your account ({user?.email}) is not linked to an employee record.</p>
+    </div>
+  )
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-8">
