@@ -23,13 +23,13 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(arrayBuffer)
 
     const { error: uploadError } = await adminSupabase.storage
-      .from("profile-photos")
+      .from("profile-photo")
       .upload(fileName, buffer, { contentType: file.type, upsert: true })
 
     if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 })
 
     const { data: { publicUrl } } = adminSupabase.storage
-      .from("profile-photos")
+      .from("profile-photo")
       .getPublicUrl(fileName)
 
     // Update the profile photo in the employees table
