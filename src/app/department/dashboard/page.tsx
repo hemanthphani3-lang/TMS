@@ -38,7 +38,7 @@ export default async function DepartmentDashboard() {
     { data: rankings }
   ] = await Promise.all([
     supabase.from('employees').select('id, employee_name, designation, profile_photo').eq('department_id', user.id),
-    supabase.from('attendance').select('employee_id, attendance_status, check_in_time, work_status, created_at').eq('department_id', user.id).gte('created_at', `${last7Days[0]}T00:00:00Z`).lte('created_at', `${today}T23:59:59Z`),
+    supabase.from('attendance').select('employee_id, attendance_status, check_in_time, work_status, working_hours, created_at').eq('department_id', user.id).gte('created_at', `${last7Days[0]}T00:00:00Z`).lte('created_at', `${today}T23:59:59Z`),
     supabase.from('logout_requests').select('*', { count: 'exact', head: true }).eq('department_id', user.id).eq('approval_status', 'PENDING'),
     supabase.from('leave_requests').select('*', { count: 'exact', head: true }).eq('department_id', user.id).eq('approval_status', 'PENDING'),
     supabase.from('tasks').select('id, task_status, assigned_employee_id').eq('department_id', user.id),
@@ -63,6 +63,20 @@ export default async function DepartmentDashboard() {
   const totalTasks = tasks?.length || 0
   const completedTasks = tasks?.filter(t => t.task_status === 'COMPLETED').length || 0
   const delayedTasks = tasks?.filter(t => t.task_status === 'DELAYED').length || 0
+
+  const loggedOutWithHours = todayAttendance.filter(a => a.work_status === 'LOGGED_OUT' && a.working_hours)
+  let avgHoursDisplay = "0h 0m"
+  if (loggedOutWithHours.length > 0) {
+    let totalMins = 0
+    loggedOutWithHours.forEach(record => {
+      const parts = record.working_hours.match(/(\d+)h\s*(\d+)m/)
+      if (parts) {
+        totalMins += parseInt(parts[1]) * 60 + parseInt(parts[2])
+      }
+    })
+    const avgMins = Math.floor(totalMins / loggedOutWithHours.length)
+    avgHoursDisplay = `${Math.floor(avgMins / 60)}h ${avgMins % 60}m`
+  }
 
   // Chart Data
   const attendanceChartData = last7Days.map(date => {
