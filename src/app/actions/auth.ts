@@ -88,6 +88,15 @@ export async function createEmployeeAccount(data: Record<string, string>) {
       throw new Error(dbError.message)
     }
 
+    // Notify the department
+    await supabaseAdmin.from('notifications').insert({
+      user_id: data.department_id,
+      title: 'New Employee Onboarded',
+      message: `${data.employee_name} (${data.employee_code}) has been added to your department${data.isAdminCreation ? ' by an Admin' : ''}.`,
+      type: 'SYSTEM',
+      link_url: `/department/employees/${userId}`
+    })
+
     return { success: true, userId }
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Unknown error"
