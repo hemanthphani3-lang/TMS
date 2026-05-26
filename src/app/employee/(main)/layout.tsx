@@ -12,11 +12,13 @@ const employeeLinks = [
 
 export default async function EmployeeLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch (_e) {}
 
-  if (!user) {
-    redirect("/login")
-  }
+  if (!user) redirect("/login")
 
   // Check today's attendance using IST-aware bounds
   const now = new Date()

@@ -31,8 +31,8 @@ export default function ActionButtons({ employeeId, departmentId }: ActionButton
     const result = await checkInEmployee(employeeId, departmentId)
     
     if (result.success || result.error === "Already checked in today.") {
-      router.push("/employee/dashboard")
-      router.refresh()
+      // Hard redirect — avoids router.push + router.refresh double-load
+      window.location.href = "/employee/dashboard"
     } else {
       setError(result.error || "Failed to check in.")
       setLoading(false)
