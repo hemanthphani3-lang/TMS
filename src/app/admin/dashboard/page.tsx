@@ -6,11 +6,13 @@ import { ActivityFeed } from "@/components/dashboard/ActivityFeed"
 import dynamic from "next/dynamic"
 
 const AttendanceChart = dynamic(() => import("@/components/dashboard/charts/AttendanceChart").then(mod => mod.AttendanceChart), {
-  loading: () => <div className="w-full h-80 bg-slate-50 animate-pulse rounded-xl" />
+  loading: () => <div className="w-full h-80 bg-slate-50 animate-pulse rounded-xl" />,
+  ssr: false
 })
 
 const TaskChart = dynamic(() => import("@/components/dashboard/charts/TaskChart").then(mod => mod.TaskChart), {
-  loading: () => <div className="w-full h-80 bg-slate-50 animate-pulse rounded-xl" />
+  loading: () => <div className="w-full h-80 bg-slate-50 animate-pulse rounded-xl" />,
+  ssr: false
 })
 import { LeaderboardTable } from "@/components/productivity/LeaderboardTable"
 import { ProductivityBadge } from "@/components/productivity/ProductivityBadge"

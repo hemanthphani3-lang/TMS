@@ -6,14 +6,16 @@ import { ActivityFeed } from "@/components/dashboard/ActivityFeed"
 import dynamic from "next/dynamic"
 
 const AttendanceChart = dynamic(() => import("@/components/dashboard/charts/AttendanceChart").then(mod => mod.AttendanceChart), {
-  loading: () => <div className="w-full h-80 bg-slate-50 animate-pulse rounded-xl" />
+  loading: () => <div className="w-full h-80 bg-slate-50 animate-pulse rounded-xl" />,
+  ssr: false
 })
 import { RealtimeLeaderboard } from "@/components/productivity/RealtimeLeaderboard"
 import { ProductivityBadge } from "@/components/productivity/ProductivityBadge"
 
 export default async function DepartmentDashboard() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) redirect("/login")
 
@@ -264,4 +266,16 @@ export default async function DepartmentDashboard() {
       </div>
     </div>
   )
+  } catch (error: any) {
+    return (
+      <div className="p-8 max-w-4xl mx-auto bg-red-50 text-red-900 border border-red-200 rounded-xl mt-8">
+        <h2 className="text-2xl font-bold mb-4">Server Component Crash (Raw)</h2>
+        <div className="bg-white p-4 rounded border border-red-100 overflow-auto text-sm font-mono whitespace-pre-wrap">
+          {error?.message || String(error)}
+          <br /><br />
+          {error?.stack}
+        </div>
+      </div>
+    )
+  }
 }
