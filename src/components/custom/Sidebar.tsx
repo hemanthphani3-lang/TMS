@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client"
 
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 const iconMap: Record<string, React.ElementType> = {
   dashboard: LayoutDashboard,
@@ -32,6 +32,52 @@ export function Sidebar({ title, links, onLogoutClick }: SidebarProps) {
   const router = useRouter()
   const supabase = createClient()
   const [isOpen, setIsOpen] = useState(false)
+  const [unreadNotifications, setUnreadNotifications] = useState(0)
+
+  useEffect(() => {
+    let channel: any;
+
+    const setupNotifications = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      // Initial fetch
+      const { count } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('is_read', false)
+      
+      if (count !== null) setUnreadNotifications(count)
+
+      // Realtime subscription
+      channel = supabase
+        .channel('sidebar_notifications_badge')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+          () => setUnreadNotifications(prev => prev + 1)
+        )
+        .on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+          (payload) => {
+            if (payload.new.is_read && !payload.old.is_read) {
+              setUnreadNotifications(prev => Math.max(0, prev - 1))
+            } else if (!payload.new.is_read && payload.old.is_read) {
+              setUnreadNotifications(prev => prev + 1) // Just in case it's marked unread
+            }
+          }
+        )
+        .subscribe()
+    }
+
+    setupNotifications()
+
+    return () => {
+      if (channel) supabase.removeChannel(channel)
+    }
+  }, [])
 
   const handleLogout = async () => {
     if (onLogoutClick) {
@@ -85,6 +131,9 @@ export function Sidebar({ title, links, onLogoutClick }: SidebarProps) {
           const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`)
           const Icon = iconMap[link.iconName] || LayoutDashboard
 
+          // Override badgeCount for notifications
+          const displayBadgeCount = link.iconName === 'bell' ? unreadNotifications : link.badgeCount
+
           return (
             <Link
               key={link.href}
@@ -99,9 +148,9 @@ export function Sidebar({ title, links, onLogoutClick }: SidebarProps) {
               <Icon className={`w-5 h-5 transition-colors ${isActive ? "text-[#0066FF]" : "text-slate-400 group-hover:text-slate-600"}`} />
               <span className="flex-1">{link.label}</span>
               
-              {link.badgeCount !== undefined && link.badgeCount > 0 && (
+              {displayBadgeCount !== undefined && displayBadgeCount > 0 && (
                 <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-                  {link.badgeCount}
+                  {displayBadgeCount}
                 </span>
               )}
               
