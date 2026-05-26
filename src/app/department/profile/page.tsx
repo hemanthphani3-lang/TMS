@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { PageHeader } from "@/components/custom/PageHeader"
 import { UserAvatar } from "@/components/custom/UserAvatar"
+import { ProfilePhotoEditor } from "@/components/settings/ProfilePhotoEditor"
 import { Card } from "@/components/ui/card"
 import { Settings, UserCircle, Building2, Hash, Briefcase } from "lucide-react"
 import Link from "next/link"
@@ -42,13 +43,11 @@ export default async function DepartmentProfilePage() {
 
       <Card className="p-8 rounded-2xl bg-white shadow-sm border-slate-200">
         <div className="flex flex-col md:flex-row gap-8 items-start">
-          <div className="flex-shrink-0">
-            <UserAvatar 
-              url={dept.profile_photo} 
-              name={dept.department_name} 
-              className="w-32 h-32 rounded-3xl text-4xl shadow-md"
+          <ProfilePhotoEditor
+              currentPhoto={dept.profile_photo}
+              name={dept.department_name}
+              userId={dept.id}
             />
-          </div>
           <div className="flex-1 space-y-6">
             <div>
               <h2 className="text-3xl font-black text-slate-900 mb-1">{dept.department_name}</h2>
