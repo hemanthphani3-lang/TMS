@@ -3,12 +3,7 @@ import { redirect } from "next/navigation"
 import { Users, Clock, CheckCircle2, XCircle, Target, Activity, AlertCircle } from "lucide-react"
 import { AnalyticsCard } from "@/components/dashboard/AnalyticsCard"
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed"
-import dynamic from "next/dynamic"
-
-const AttendanceChart = dynamic(() => import("@/components/dashboard/charts/AttendanceChart").then(mod => mod.AttendanceChart), {
-  loading: () => <div className="w-full h-80 bg-slate-50 animate-pulse rounded-xl" />,
-  ssr: false
-})
+import { AttendanceChart } from "@/components/dashboard/charts/AttendanceChart"
 import { RealtimeLeaderboard } from "@/components/productivity/RealtimeLeaderboard"
 import { ProductivityBadge } from "@/components/productivity/ProductivityBadge"
 
