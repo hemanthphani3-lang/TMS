@@ -4,7 +4,7 @@ import { redirect } from "next/navigation"
 import { PageHeader } from "@/components/custom/PageHeader"
 import { UserAvatar } from "@/components/custom/UserAvatar"
 import { Card } from "@/components/ui/card"
-import { Settings, UserCircle, Building2, Hash, Briefcase } from "lucide-react"
+import { Settings, UserCircle, Building2, Hash, Briefcase, Calendar } from "lucide-react"
 import Link from "next/link"
 
 export const metadata = {
@@ -90,15 +90,23 @@ export default async function EmployeeProfilePage() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-slate-500 flex items-center gap-1.5 mb-1">
+                  <UserCircle className="w-4 h-4" /> Role
+                </p>
+                <p className="text-lg font-bold text-slate-900">{emp.designation}</p>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-500 flex items-center gap-1.5 mb-1">
                   <Building2 className="w-4 h-4" /> Department
                 </p>
                 <p className="text-lg font-bold text-slate-900">{emp.departments?.department_name || "N/A"}</p>
               </div>
               <div>
                 <p className="text-sm font-semibold text-slate-500 flex items-center gap-1.5 mb-1">
-                  <UserCircle className="w-4 h-4" /> Role
+                  <Calendar className="w-4 h-4" /> Joined Date
                 </p>
-                <p className="text-lg font-bold text-slate-900">{emp.designation}</p>
+                <p className="text-lg font-bold text-slate-900">
+                  {emp.joining_date ? new Date(emp.joining_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : "N/A"}
+                </p>
               </div>
             </div>
           </div>
