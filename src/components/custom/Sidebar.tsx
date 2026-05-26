@@ -3,12 +3,14 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
-import { LogOut, LayoutDashboard, Building2, Users, User, Calendar, ListTodo, Menu, X, FileText, Bell } from "lucide-react"
+import { LogOut, LayoutDashboard, Building2, Users, User, Calendar, ListTodo, Menu, X, FileText, Bell, Megaphone } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { useState, useEffect } from "react"
+
+const EmojiSpeaker = ({ className }: { className?: string }) => <span className={className} style={{ fontSize: '1.25rem', lineHeight: 1 }}>📣</span>
 
 const iconMap: Record<string, React.ElementType> = {
   dashboard: LayoutDashboard,
@@ -19,6 +21,8 @@ const iconMap: Record<string, React.ElementType> = {
   tasks: ListTodo,
   file: FileText,
   bell: Bell,
+  megaphone: Megaphone,
+  speakerEmoji: EmojiSpeaker,
 }
 
 interface SidebarProps {
