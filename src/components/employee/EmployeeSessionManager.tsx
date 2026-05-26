@@ -1,0 +1,98 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { createClient } from "@/lib/supabase/client"
+import { useRouter } from "next/navigation"
+import { Sidebar } from "@/components/custom/Sidebar"
+import { WorkSubmissionModal } from "./WorkSubmissionModal"
+
+export function EmployeeSessionManager({ children, links }: { children: React.ReactNode; links: any[] }) {
+  const [showModal, setShowModal] = useState(false)
+  const supabase = createClient()
+  const router = useRouter()
+
+  useEffect(() => {
+    // Listen for backend forceful logout when department approves the request
+    let subscription: any
+
+    const setupRealtime = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      // Use a unique channel name to prevent Strict Mode race conditions
+      const channelName = `employee_session_${user.id}_${Date.now()}`
+      subscription = supabase.channel(channelName)
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'attendance',
+          filter: `employee_id=eq.${user.id}`
+        }, async (payload: any) => {
+          if (payload.new.work_status === 'LOGGED_OUT') {
+            // Logout approved — redirect to identity check so employee can re-check-in
+            // Do NOT sign out — they are still authenticated
+            router.push('/employee/identity-check')
+            router.refresh()
+          }
+        })
+        .subscribe()
+    }
+
+    setupRealtime()
+    return () => { if (subscription) supabase.removeChannel(subscription) }
+  }, [supabase, router])
+
+  const handleLogoutIntercept = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      router.push('/login')
+      return
+    }
+
+    const nowMs = new Date()
+    const istOffset = 5.5 * 60 * 60 * 1000
+    const todayIST = new Date(nowMs.getTime() + istOffset).toISOString().split('T')[0]
+    const startUTC = new Date(`${todayIST}T00:00:00+05:30`).toISOString()
+    const endUTC = new Date(`${todayIST}T23:59:59+05:30`).toISOString()
+
+    const { data: attendance } = await supabase
+      .from('attendance')
+      .select('work_status')
+      .eq('employee_id', user.id)
+      .gte('created_at', startUTC)
+      .lte('created_at', endUTC)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (!attendance) {
+      // Not checked in today at all → direct auth sign-out
+      await supabase.auth.signOut()
+      router.push('/login')
+      router.refresh()
+    } else if (attendance.work_status === 'LOGGED_OUT') {
+      // Already officially logged out → go to identity check to re-check-in
+      router.push('/employee/identity-check')
+    } else if (attendance.work_status === 'LOGOUT_REQUESTED') {
+      // Already requested
+      alert("Your logout request is currently pending. Please wait for your department to approve it.")
+    } else {
+      // Active session → must submit work
+      setShowModal(true)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-[#F8FAFC]">
+      <Sidebar title="Employee Portal" links={links} onLogoutClick={handleLogoutIntercept} />
+      
+      <div className="md:pl-64 flex flex-col min-h-screen transition-all duration-300">
+        <main className="flex-1 w-full">
+          {children}
+        </main>
+      </div>
+
+      <WorkSubmissionModal isOpen={showModal} onClose={() => setShowModal(false)} />
+    </div>
+  )
+}

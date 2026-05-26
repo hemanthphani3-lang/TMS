@@ -1,0 +1,96 @@
+"use server"
+
+import { createClient } from '@supabase/supabase-js'
+
+// We use the service_role key to bypass RLS and create Auth users
+// without modifying the current user's session.
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+)
+
+export async function createDepartmentAccount(data: Record<string, string>) {
+  try {
+    // 1. Create Auth User
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email: data.department_email,
+      password: data.password,
+      email_confirm: true,
+    })
+
+    if (authError) throw new Error(authError.message)
+    const userId = authData.user.id
+
+    // 2. Insert into departments table
+    const { error: dbError } = await supabaseAdmin
+      .from('departments')
+      .insert({
+        id: userId,
+        department_name: data.department_name,
+        department_email: data.department_email,
+        department_head_name: data.department_head_name,
+        department_code: data.department_code,
+        profile_photo: data.profile_photo,
+        created_by_admin: data.admin_id,
+        check_in_cutoff_time: data.check_in_cutoff_time || '09:30:00',
+      })
+
+    if (dbError) {
+      // Rollback Auth user if DB insert fails
+      await supabaseAdmin.auth.admin.deleteUser(userId)
+      throw new Error(dbError.message)
+    }
+
+    return { success: true, userId }
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error"
+    return { success: false, error: message }
+  }
+}
+
+export async function createEmployeeAccount(data: Record<string, string>) {
+  try {
+    // 1. Create Auth User
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email: data.employee_email,
+      password: data.password,
+      email_confirm: true,
+    })
+
+    if (authError) throw new Error(authError.message)
+    const userId = authData.user.id
+
+    // 2. Insert into employees table
+    const { error: dbError } = await supabaseAdmin
+      .from('employees')
+      .insert({
+        id: userId,
+        employee_name: data.employee_name,
+        employee_email: data.employee_email,
+        designation: data.designation,
+        phone_number: data.phone_number,
+        employee_code: data.employee_code,
+        joining_date: data.joining_date,
+        profile_photo: data.profile_photo,
+        department_id: data.department_id,
+        created_by_department: data.department_id,
+      })
+
+    if (dbError) {
+      // Rollback Auth user if DB insert fails
+      await supabaseAdmin.auth.admin.deleteUser(userId)
+      throw new Error(dbError.message)
+    }
+
+    return { success: true, userId }
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error"
+    return { success: false, error: message }
+  }
+}
