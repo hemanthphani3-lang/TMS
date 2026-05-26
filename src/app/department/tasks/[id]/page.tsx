@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { PageHeader } from "@/components/custom/PageHeader"
 import { ArrowLeft, Calendar, Clock, AlignLeft, CheckCircle2, RotateCcw } from "lucide-react"
 import Link from "next/link"
 import { TaskStatusBadge } from "@/components/tasks/TaskStatusBadge"
@@ -12,36 +11,52 @@ import { TaskCommentBox } from "@/components/tasks/TaskCommentBox"
 export default async function DepartmentTaskDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: taskId } = await params
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch (_e) {}
+
   if (!user) redirect('/login')
 
-  // Fetch task with employee details
-  const { data: task } = await supabase
-    .from('tasks')
-    .select('*, employees!assigned_employee_id(*)')
-    .eq('id', taskId)
-    .eq('department_id', user.id)
-    .single()
+  // Fetch task, comments, and activity logs all in parallel
+  const [
+    { data: task },
+    { data: comments },
+    { data: logs }
+  ] = await Promise.all([
+    supabase
+      .from('tasks')
+      .select('*, employees!assigned_employee_id(*)')
+      .eq('id', taskId)
+      .eq('department_id', user!.id)
+      .single(),
+    supabase
+      .from('task_comments')
+      .select('*')
+      .eq('task_id', taskId)
+      .order('created_at', { ascending: true }),
+    supabase
+      .from('task_activity_logs')
+      .select('*')
+      .eq('task_id', taskId)
+      .order('created_at', { ascending: false })
+  ])
 
   if (!task) {
-    return <div className="p-8">Task not found or unauthorized.</div>
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-8">
+        <div className="text-center">
+          <h2 className="text-xl font-bold text-slate-900 mb-2">Task not found</h2>
+          <p className="text-slate-500 mb-4">This task doesn&apos;t exist or you don&apos;t have permission to view it.</p>
+          <Link href="/department/tasks" className="text-[#0066FF] font-medium hover:underline">← Back to Tasks</Link>
+        </div>
+      </div>
+    )
   }
 
   const emp = task.employees as unknown as { employee_name: string, profile_photo: string | null, designation: string }
-
-  // Fetch comments
-  const { data: comments } = await supabase
-    .from('task_comments')
-    .select('*')
-    .eq('task_id', taskId)
-    .order('created_at', { ascending: true })
-
-  // Fetch activity logs
-  const { data: logs } = await supabase
-    .from('task_activity_logs')
-    .select('*')
-    .eq('task_id', taskId)
-    .order('created_at', { ascending: false })
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-4 sm:p-8">
@@ -99,16 +114,16 @@ export default async function DepartmentTaskDetailsPage({ params }: { params: Pr
               </p>
             </div>
 
-            {/* Comments Section placeholder - will build client component next */}
+            {/* Discussion / Comments */}
             <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-100 shadow-sm">
               <h3 className="font-bold text-slate-900 text-lg mb-6">Discussion</h3>
-              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 mb-4">
                 {comments?.length === 0 && (
                   <p className="text-slate-500 text-center py-4">No comments yet. Start the conversation!</p>
                 )}
                 {comments?.map(comment => (
                   <div key={comment.id} className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                    <p className="text-xs font-bold text-slate-400 mb-1">{new Date(comment.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short'})}</p>
+                    <p className="text-xs font-bold text-slate-400 mb-1">{new Date(comment.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</p>
                     <p className="text-slate-800 text-sm">{comment.comment_text}</p>
                   </div>
                 ))}
@@ -141,20 +156,21 @@ export default async function DepartmentTaskDetailsPage({ params }: { params: Pr
                 <Clock className="w-4 h-4 text-slate-400" />
                 Activity Log
               </h3>
-              <div className="space-y-4 relative before:absolute before:inset-0 before:ml-2 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
-                {logs?.map(log => (
-                  <div key={log.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                    <div className="flex items-center justify-center w-4 h-4 rounded-full border-2 border-white bg-slate-300 group-[.is-active]:bg-[#0066FF] text-slate-500 group-[.is-active]:text-emerald-50 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2" />
-                    <div className="w-[calc(100%-2rem)] md:w-[calc(50%-1.5rem)] p-3 rounded-lg border border-slate-100 bg-white shadow-sm">
-                      <div className="flex items-center justify-between space-x-2 mb-1">
-                        <div className="font-bold text-slate-900 text-xs">{log.action_type.replace('_', ' ')}</div>
+              {logs && logs.length > 0 ? (
+                <div className="space-y-3">
+                  {logs.map(log => (
+                    <div key={log.id} className="p-3 rounded-lg border border-slate-100 bg-slate-50">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-bold text-slate-800 text-xs">{log.action_type.replace(/_/g, ' ')}</span>
                         <time className="text-[10px] text-slate-500">{new Date(log.created_at).toLocaleDateString()}</time>
                       </div>
-                      <div className="text-xs text-slate-600">{log.action_description}</div>
+                      <p className="text-xs text-slate-600">{log.action_description}</p>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-slate-500 text-sm text-center py-4">No activity yet.</p>
+              )}
             </div>
           </div>
         </div>
