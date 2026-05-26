@@ -11,53 +11,42 @@ export async function broadcastAnnouncement(formData: FormData) {
 
   const title = formData.get('title') as string
   const message = formData.get('message') as string
-  const target = formData.get('target') as string // 'ALL', 'DEPARTMENTS', 'EMPLOYEES'
+  const target = formData.get('target') as string // 'ALL', 'DEPARTMENTS', 'EMPLOYEES', 'DEPARTMENT_EMPLOYEES'
 
   if (!title || !message) {
     return { success: false, error: "Missing required fields" }
   }
 
-  const notificationsToInsert = []
-
-  // Fetch target users
-  if (target === 'ALL' || target === 'DEPARTMENTS') {
-    const { data: depts } = await supabase.from('departments').select('id')
-    if (depts) {
-      depts.forEach(d => {
-        notificationsToInsert.push({
-          user_id: d.id,
-          title: `📣 ${title}`,
-          message: message,
-          type: 'ANNOUNCEMENT',
-          link_url: '#'
-        })
-      })
-    }
+  // Determine sender role
+  let senderRole = 'EMPLOYEE'
+  const { data: adminCheck } = await supabase.from('admins').select('id').eq('id', user.id).maybeSingle()
+  if (adminCheck) senderRole = 'ADMIN'
+  else {
+    const { data: deptCheck } = await supabase.from('departments').select('id').eq('id', user.id).maybeSingle()
+    if (deptCheck) senderRole = 'DEPARTMENT'
   }
 
-  if (target === 'ALL' || target === 'EMPLOYEES') {
-    const { data: emps } = await supabase.from('employees').select('id')
-    if (emps) {
-      emps.forEach(e => {
-        notificationsToInsert.push({
-          user_id: e.id,
-          title: `📣 ${title}`,
-          message: message,
-          type: 'ANNOUNCEMENT',
-          link_url: '#'
-        })
-      })
-    }
+  if (senderRole === 'EMPLOYEE') return { success: false, error: "Unauthorized" }
+
+  const payload: any = {
+    title,
+    message,
+    sender_id: user.id,
+    sender_role: senderRole,
+    target_audience: target
   }
 
-  if (notificationsToInsert.length > 0) {
-    const { error } = await supabase.from('notifications').insert(notificationsToInsert)
-    if (error) return { success: false, error: error.message }
+  if (target === 'DEPARTMENT_EMPLOYEES' && senderRole === 'DEPARTMENT') {
+    payload.target_department_id = user.id
   }
+
+  const { error } = await supabase.from('announcements').insert(payload)
+
+  if (error) return { success: false, error: error.message }
 
   revalidatePath('/admin/announcements')
-  revalidatePath('/employee/notifications')
-  revalidatePath('/department/notifications')
+  revalidatePath('/department/announcements')
+  revalidatePath('/employee/announcements')
   
   return { success: true }
 }

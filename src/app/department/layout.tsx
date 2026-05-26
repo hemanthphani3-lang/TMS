@@ -29,6 +29,7 @@ export default async function DepartmentLayout({ children }: { children: React.R
     { label: "Tasks", href: "/department/tasks", iconName: "tasks" },
     { label: "Leave Approvals", href: "/department/leave-approvals", iconName: "calendar", badgeCount: pendingLeavesCount },
     { label: "Logout Requests", href: "/department/logouts", iconName: "identity" },
+    { label: "Announcements", href: "/department/announcements", iconName: "megaphone" },
     { label: "Reports", href: "/department/reports", iconName: "file" },
     { label: "Notifications", href: "/department/notifications", iconName: "bell" },
   ]

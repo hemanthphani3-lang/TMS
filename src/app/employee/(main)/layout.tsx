@@ -7,6 +7,7 @@ const employeeLinks = [
   { label: "Dashboard", href: "/employee/dashboard", iconName: "dashboard" },
   { label: "Tasks", href: "/employee/tasks", iconName: "tasks" },
   { label: "Leave", href: "/employee/leave", iconName: "calendar" },
+  { label: "Announcements", href: "/employee/announcements", iconName: "megaphone" },
   { label: "Reports", href: "/employee/reports", iconName: "file" },
   { label: "Notifications", href: "/employee/notifications", iconName: "bell" },
 ]
