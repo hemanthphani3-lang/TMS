@@ -1,3 +1,5 @@
+"use client"
+
 import { Card } from "@/components/ui/card"
 import { Mail, Users } from "lucide-react"
 import { StatusBadge } from "./StatusBadge"
