@@ -4,10 +4,17 @@ import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
+import { createClient as createSupabaseClient } from "@supabase/supabase-js"
+
 export async function requestLogoutAndSubmitWork(formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: "Unauthorized" }
+
+  const supabaseAdmin = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
 
   const comment = formData.get('work_comment') as string
   const file = formData.get('attachment') as File
@@ -89,8 +96,8 @@ export async function requestLogoutAndSubmitWork(formData: FormData) {
   let logoutRequestId: string
 
   if (existingRequest) {
-    // Update existing to PENDING
-    const { error: updateError } = await supabase
+    // Update existing to PENDING using admin client to bypass RLS
+    const { error: updateError } = await supabaseAdmin
       .from('logout_requests')
       .update({ 
         approval_status: 'PENDING',
@@ -102,10 +109,10 @@ export async function requestLogoutAndSubmitWork(formData: FormData) {
     logoutRequestId = existingRequest.id
 
     // Delete old work submissions to replace them
-    await supabase.from('work_submissions').delete().eq('logout_request_id', logoutRequestId)
+    await supabaseAdmin.from('work_submissions').delete().eq('logout_request_id', logoutRequestId)
   } else {
     // Insert new
-    const { data: newRequest, error: insertError } = await supabase
+    const { data: newRequest, error: insertError } = await supabaseAdmin
       .from('logout_requests')
       .insert({
         employee_id: user.id,
@@ -121,7 +128,7 @@ export async function requestLogoutAndSubmitWork(formData: FormData) {
   }
 
   // Create Work Submission
-  const { error: wsError } = await supabase
+  const { error: wsError } = await supabaseAdmin
     .from('work_submissions')
     .insert({
       logout_request_id: logoutRequestId,
