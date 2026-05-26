@@ -19,8 +19,8 @@ export default async function DepartmentAnnouncementsPage() {
     .select('*')
     .order('created_at', { ascending: false })
 
-  const { data: departments } = await supabase.from('departments').select('id, name')
-  const deptMap = new Map(departments?.map(d => [d.id, d.name]) || [])
+  const { data: departments } = await supabase.from('departments').select('id, department_name')
+  const deptMap = new Map(departments?.map(d => [d.id, d.department_name]) || [])
 
   const announcements = (announcementsRaw || []).map(a => ({
     ...a,
