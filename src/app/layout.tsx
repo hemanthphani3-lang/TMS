@@ -28,9 +28,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-[#F8FAFC] dark:bg-[#0A1A2F] text-slate-900 dark:text-slate-100 transition-colors duration-300`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-[#F8FAFC] text-slate-900 transition-colors duration-300`}
       >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light" disableTransitionOnChange>
           <RealtimeListener />
           {children}
         </ThemeProvider>
