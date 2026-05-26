@@ -23,18 +23,18 @@ export default async function EmployeeProfilePage() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  // First try by auth user ID (primary link)
+  // First try by auth user ID
   let { data: emp } = await adminSupabase
     .from('employees')
-    .select('*, departments(department_name)')
+    .select('*')
     .eq('id', user!.id)
     .maybeSingle()
 
-  // Fallback: try by email (handles edge cases)
+  // Fallback: try by email
   if (!emp && user?.email) {
     const { data: empByEmail } = await adminSupabase
       .from('employees')
-      .select('*, departments(department_name)')
+      .select('*')
       .eq('employee_email', user.email)
       .maybeSingle()
     emp = empByEmail
@@ -46,6 +46,17 @@ export default async function EmployeeProfilePage() {
       <p className="text-sm mt-1">Your account ({user?.email}) is not linked to an employee record.</p>
     </div>
   )
+
+  // Fetch department name separately
+  let departmentName = "N/A"
+  if (emp.department_id) {
+    const { data: dept } = await adminSupabase
+      .from('departments')
+      .select('department_name')
+      .eq('id', emp.department_id)
+      .maybeSingle()
+    if (dept) departmentName = dept.department_name
+  }
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-8">
@@ -98,7 +109,7 @@ export default async function EmployeeProfilePage() {
                 <p className="text-sm font-semibold text-slate-500 flex items-center gap-1.5 mb-1">
                   <Building2 className="w-4 h-4" /> Department
                 </p>
-                <p className="text-lg font-bold text-slate-900">{emp.departments?.department_name || "N/A"}</p>
+                <p className="text-lg font-bold text-slate-900">{departmentName}</p>
               </div>
               <div>
                 <p className="text-sm font-semibold text-slate-500 flex items-center gap-1.5 mb-1">
