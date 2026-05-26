@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { createClient as createAdminClient } from "@supabase/supabase-js"
 import { redirect } from "next/navigation"
 import { PageHeader } from "@/components/custom/PageHeader"
 import { UserAvatar } from "@/components/custom/UserAvatar"
@@ -16,8 +17,14 @@ export default async function EmployeeProfilePage() {
 
   if (!user) redirect("/login")
 
+  // Use service role client to bypass RLS
+  const adminSupabase = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
   // First try by auth user ID (primary link)
-  let { data: emp } = await supabase
+  let { data: emp } = await adminSupabase
     .from('employees')
     .select('*, departments(department_name)')
     .eq('id', user!.id)
@@ -25,7 +32,7 @@ export default async function EmployeeProfilePage() {
 
   // Fallback: try by email (handles edge cases)
   if (!emp && user?.email) {
-    const { data: empByEmail } = await supabase
+    const { data: empByEmail } = await adminSupabase
       .from('employees')
       .select('*, departments(department_name)')
       .eq('employee_email', user.email)
