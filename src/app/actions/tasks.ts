@@ -307,7 +307,7 @@ export async function escalateTask(taskId: string) {
   if (!user) return { success: false, error: "Unauthorized" }
 
   // Check if department owns the task
-  const { data: task } = await supabase.from('tasks').select('*, department_name:departments(name)').eq('id', taskId).single()
+  const { data: task } = await supabase.from('tasks').select('*').eq('id', taskId).single()
   if (!task) return { success: false, error: "Task not found" }
   if (task.department_id !== user.id) return { success: false, error: "Unauthorized: You do not own this task" }
 
