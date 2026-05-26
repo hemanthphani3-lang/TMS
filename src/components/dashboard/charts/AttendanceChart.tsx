@@ -42,6 +42,8 @@ export function AttendanceChart({ data }: AttendanceChartProps) {
               axisLine={false}
               tickLine={false}
               tick={{ fill: '#64748B', fontSize: 12 }}
+              allowDecimals={false}
+              label={{ value: 'Employees', angle: -90, position: 'insideLeft', offset: 20, style: { fill: '#94A3B8', fontSize: 11 } }}
             />
             <Tooltip 
               contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}
