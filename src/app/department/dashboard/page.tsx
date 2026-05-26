@@ -192,7 +192,7 @@ export default async function DepartmentDashboard() {
                     <div key={emp.id} className="flex items-center justify-between bg-white rounded-xl p-4 border border-orange-100">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-sm">
-                          {emp.employee_name.charAt(0)}
+                          {(emp.employee_name || 'U').charAt(0)}
                         </div>
                         <div>
                           <p className="font-semibold text-slate-900">{emp.employee_name}</p>
