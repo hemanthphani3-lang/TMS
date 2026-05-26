@@ -15,15 +15,12 @@ export default async function AdminDashboard(props: { searchParams: Promise<{ [k
     const dept_id = searchParams.dept_id as string | undefined
 
     const supabase = await createClient()
-    const { data: { user: supabaseUser } } = await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser()
 
-  // if (!user) redirect("/login")
-  // if (role?.role !== 'ADMIN') redirect("/employee/dashboard")
-  
-  // Fake user for debugging
-  const user = { id: 'test' }
-  const today = new Date().toISOString().split('T')[0]
-  const last7Days = Array.from({ length: 7 }).map((_, i) => {
+    if (!user) redirect("/login")
+
+    const today = new Date().toISOString().split('T')[0]
+    const last7Days = Array.from({ length: 7 }).map((_, i) => {
     const d = new Date()
     d.setDate(d.getDate() - i)
     return d.toISOString().split('T')[0]
