@@ -107,49 +107,53 @@ export function TaskCommentBox({
           const showSender = !prevComment || prevComment.user_id !== comment.user_id
 
           return (
-            <div key={comment.id} className={`flex items-end gap-2 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
-              {/* Avatar — only show on last in a group */}
-              <div className="w-8 flex-shrink-0 self-end mb-1">
-                {showSender && (
-                  comment.sender_avatar ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={comment.sender_avatar}
-                      alt={senderName}
-                      className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm"
-                    />
-                  ) : (
-                    <div className={`w-8 h-8 rounded-full ${avatarColor} text-white flex items-center justify-center text-[10px] font-bold shadow-sm`}>
-                      {initials}
-                    </div>
-                  )
-                )}
-              </div>
-
-              {/* Bubble */}
-              <div className={`flex flex-col max-w-[72%] ${isMe ? "items-end" : "items-start"}`}>
-                {showSender && !isMe && (
-                  <div className="flex items-baseline gap-1.5 mb-1 ml-1">
-                    <span className="text-xs font-bold text-slate-700">{senderName}</span>
-                    {senderRole && (
-                      <span className="text-[10px] text-slate-400 capitalize">{senderRole.toLowerCase()}</span>
+            <div key={comment.id} className={`flex w-full ${isMe ? "justify-end" : "justify-start"}`}>
+              <div className={`flex items-end gap-2 max-w-[85%] ${isMe ? "flex-row-reverse" : "flex-row"}`}>
+                {/* Avatar — hide for current user, only show for others on last in a group */}
+                {!isMe && (
+                  <div className="w-8 flex-shrink-0 self-end mb-1">
+                    {showSender && (
+                      comment.sender_avatar ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={comment.sender_avatar}
+                          alt={senderName}
+                          className="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-slate-800 shadow-sm"
+                        />
+                      ) : (
+                        <div className={`w-8 h-8 rounded-full ${avatarColor} text-white flex items-center justify-center text-[10px] font-bold shadow-sm`}>
+                          {initials}
+                        </div>
+                      )
                     )}
                   </div>
                 )}
-                <div
-                  className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
-                    isMe
-                      ? "bg-[#0066FF] text-white rounded-br-sm"
-                      : "bg-slate-100 text-slate-800 rounded-bl-sm"
-                  }`}
-                >
-                  {comment.comment_text}
+
+                {/* Bubble */}
+                <div className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
+                  {showSender && !isMe && (
+                    <div className="flex items-baseline gap-1.5 mb-1 ml-1">
+                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{senderName}</span>
+                      {senderRole && (
+                        <span className="text-[10px] text-slate-400 capitalize">{senderRole.toLowerCase()}</span>
+                      )}
+                    </div>
+                  )}
+                  <div
+                    className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                      isMe
+                        ? "bg-[#0066FF] text-white rounded-br-sm"
+                        : "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-100 rounded-bl-sm"
+                    }`}
+                  >
+                    {comment.comment_text}
+                  </div>
+                  <span suppressHydrationWarning className="text-[10px] text-slate-400 mt-1 mx-1">
+                    {new Date(comment.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    {" · "}
+                    {new Date(comment.created_at).toLocaleDateString([], { day: "numeric", month: "short" })}
+                  </span>
                 </div>
-                <span suppressHydrationWarning className="text-[10px] text-slate-400 mt-1 mx-1">
-                  {new Date(comment.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  {" · "}
-                  {new Date(comment.created_at).toLocaleDateString([], { day: "numeric", month: "short" })}
-                </span>
               </div>
             </div>
           )
