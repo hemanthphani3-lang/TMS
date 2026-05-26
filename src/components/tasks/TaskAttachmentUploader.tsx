@@ -14,6 +14,19 @@ export function TaskAttachmentUploader({ taskId }: { taskId: string }) {
     const file = e.target.files?.[0]
     if (!file) return
 
+    // File Validation: Max 5MB
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File size exceeds 5MB limit.")
+      return
+    }
+
+    // Basic Type Validation
+    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
+    if (!file.type.startsWith('image/') && !allowedTypes.includes(file.type)) {
+      alert("Invalid file type. Only PDF, DOCX, XLSX, and Images are allowed.")
+      return
+    }
+
     try {
       setIsUploading(true)
       
@@ -40,8 +53,8 @@ export function TaskAttachmentUploader({ taskId }: { taskId: string }) {
         
       alert("File uploaded successfully!")
 
-    } catch (error: any) {
-      alert("Error uploading file: " + error.message)
+    } catch (error: unknown) {
+      alert("Error uploading file: " + (error instanceof Error ? error.message : String(error)))
     } finally {
       setIsUploading(false)
     }

@@ -56,7 +56,7 @@ export default function ActionButtons({ employeeId, departmentId }: ActionButton
         className="w-full text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl"
       >
         <LogOut className="w-4 h-4 mr-2" />
-        This isn't me
+        This isn&apos;t me
       </Button>
     </div>
   )

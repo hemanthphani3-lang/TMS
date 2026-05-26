@@ -31,8 +31,8 @@ export function LeaderboardTable({ entries, title = "Top Performers" }: Leaderbo
       <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
         <h3 className="text-lg font-bold text-[#0A1A2F]">{title}</h3>
       </div>
-      <div className="flex-1 overflow-auto">
-        <table className="w-full text-left border-collapse">
+      <div className="flex-1 overflow-x-auto">
+        <table className="w-full text-left border-collapse whitespace-nowrap md:whitespace-normal">
           <thead>
             <tr className="border-b border-slate-100 text-xs uppercase tracking-wider text-slate-500 bg-white">
               <th className="px-6 py-4 font-semibold">Rank</th>

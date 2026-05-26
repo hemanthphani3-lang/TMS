@@ -5,6 +5,7 @@ const adminLinks = [
   { label: "Dashboard", href: "/admin/dashboard", iconName: "dashboard" },
   { label: "Departments", href: "/admin/departments", iconName: "departments" },
   { label: "Holidays", href: "/admin/holidays", iconName: "calendar" },
+  { label: "Reports", href: "/admin/reports", iconName: "file" },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

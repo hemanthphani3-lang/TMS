@@ -76,7 +76,7 @@ export default async function EmployeeDashboard() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-black text-[#0A1A2F] tracking-tight">Welcome back, {employee?.employee_name?.split(' ')[0]}! 👋</h1>
-          <p className="text-slate-500 mt-1 font-medium">Here's your productivity overview for today.</p>
+          <p className="text-slate-500 mt-1 font-medium">Here&apos;s your productivity overview for today.</p>
         </div>
         <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-xl border border-slate-100 shadow-sm">
           <Calendar className="w-5 h-5 text-blue-600" />

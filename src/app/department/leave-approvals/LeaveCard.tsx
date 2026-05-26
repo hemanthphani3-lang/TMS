@@ -5,8 +5,8 @@ import { CheckCircle2, XCircle, Clock } from "lucide-react"
 import { updateLeaveStatus } from "@/app/actions/leave"
 
 interface LeaveCardProps {
-  leave: any
-  emp: any
+  leave: { id: string, approval_status: string, leave_type: string, start_date: string, end_date: string, reason: string }
+  emp: { employee_name: string, profile_photo: string | null }
 }
 
 export function LeaveCard({ leave, emp }: LeaveCardProps) {

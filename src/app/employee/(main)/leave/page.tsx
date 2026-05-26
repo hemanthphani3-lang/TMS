@@ -103,7 +103,7 @@ export default async function EmployeeLeavePage() {
                 ))
               ) : (
                 <div className="text-center py-12 text-slate-500">
-                  <p>You haven't submitted any leave requests yet.</p>
+                  <p>You haven&apos;t submitted any leave requests yet.</p>
                 </div>
               )}
             </div>

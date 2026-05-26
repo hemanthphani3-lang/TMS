@@ -27,7 +27,7 @@ export default async function DepartmentTaskDetailsPage({ params }: { params: Pr
     return <div className="p-8">Task not found or unauthorized.</div>
   }
 
-  const emp = task.employees as any
+  const emp = task.employees as unknown as { employee_name: string, profile_photo: string | null, designation: string }
 
   // Fetch comments
   const { data: comments } = await supabase

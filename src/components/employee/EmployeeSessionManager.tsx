@@ -6,14 +6,14 @@ import { useRouter } from "next/navigation"
 import { Sidebar } from "@/components/custom/Sidebar"
 import { WorkSubmissionModal } from "./WorkSubmissionModal"
 
-export function EmployeeSessionManager({ children, links }: { children: React.ReactNode; links: any[] }) {
+export function EmployeeSessionManager({ children, links }: { children: React.ReactNode; links: { label: string; href: string; iconName: string; badgeCount?: number }[] }) {
   const [showModal, setShowModal] = useState(false)
   const supabase = createClient()
   const router = useRouter()
 
   useEffect(() => {
     // Listen for backend forceful logout when department approves the request
-    let subscription: any
+    let subscription: import('@supabase/supabase-js').RealtimeChannel
 
     const setupRealtime = async () => {
       const { data: { user } } = await supabase.auth.getUser()
@@ -27,7 +27,7 @@ export function EmployeeSessionManager({ children, links }: { children: React.Re
           schema: 'public',
           table: 'attendance',
           filter: `employee_id=eq.${user.id}`
-        }, async (payload: any) => {
+        }, async (payload: { new: { work_status?: string } }) => {
           if (payload.new.work_status === 'LOGGED_OUT') {
             // Logout approved — redirect to identity check so employee can re-check-in
             // Do NOT sign out — they are still authenticated

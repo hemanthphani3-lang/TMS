@@ -20,6 +20,23 @@ export function WorkSubmissionModal({ isOpen, onClose }: WorkSubmissionModalProp
     setError("")
     
     const formData = new FormData(e.currentTarget)
+    const file = formData.get('attachment') as File | null
+    
+    if (file && file.size > 0) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError("File size exceeds 5MB limit.")
+        setLoading(false)
+        return
+      }
+      
+      const allowedTypes = ['application/zip', 'application/x-zip-compressed', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation']
+      if (!file.type.startsWith('image/') && !allowedTypes.includes(file.type)) {
+        setError("Invalid file type. Only ZIP, PDF, Docs, Excel, PPT, and Images are allowed.")
+        setLoading(false)
+        return
+      }
+    }
+
     const result = await requestLogoutAndSubmitWork(formData)
     
     if (result.success) {
@@ -57,7 +74,7 @@ export function WorkSubmissionModal({ isOpen, onClose }: WorkSubmissionModalProp
           </button>
 
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">Submit Today's Work</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">Submit Today&apos;s Work</h2>
             <p className="text-sm text-slate-500">
               You must submit a summary of your work or upload a file to request logout approval from your department.
             </p>
