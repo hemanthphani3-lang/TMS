@@ -6,7 +6,13 @@ import { LeaveCard } from "./LeaveCard"
 
 export default async function DepartmentLeaveApprovalsPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch (error) {
+    console.error("Auth error:", error)
+  }
 
   if (!user) redirect("/login")
 

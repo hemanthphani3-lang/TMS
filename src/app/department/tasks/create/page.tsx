@@ -11,7 +11,13 @@ import { AssigneeSelect } from "@/components/tasks/AssigneeSelect"
 export default async function CreateTaskPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { error } = await searchParams
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch (error) {
+    console.error("Auth error:", error)
+  }
   if (!user) redirect('/login')
 
   // Fetch employees to populate the assignee dropdown

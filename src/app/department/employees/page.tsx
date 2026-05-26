@@ -7,7 +7,13 @@ import { Plus } from "lucide-react"
 
 export default async function DepartmentEmployeesPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch (error) {
+    console.error("Auth error:", error)
+  }
   if (!user) redirect('/login')
 
   // RLS ensures the department can only fetch their own employees

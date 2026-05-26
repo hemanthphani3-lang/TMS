@@ -7,7 +7,13 @@ import { Plus } from "lucide-react"
 
 export default async function AdminDepartmentsPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch (error) {
+    console.error("Auth error:", error)
+  }
   if (!user) redirect('/login')
 
   const { data: departments } = await supabase

@@ -6,7 +6,13 @@ import Link from "next/link"
 export default async function EmployeeDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: employeeId } = await params
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch (error) {
+    console.error("Auth error:", error)
+  }
 
   if (!user) redirect("/login")
 

@@ -8,7 +8,13 @@ import { PriorityBadge } from "@/components/tasks/PriorityBadge"
 
 export default async function EmployeeTasksPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch (error) {
+    console.error("Auth error:", error)
+  }
   if (!user) redirect('/login')
 
   // Fetch tasks assigned to this employee
