@@ -13,10 +13,18 @@ export default async function EmployeeAnnouncementsPage() {
 
   if (!user) redirect("/login")
 
-  const { data: announcements } = await supabase
+  const { data: announcementsRaw } = await supabase
     .from('announcements')
     .select('*')
     .order('created_at', { ascending: false })
+
+  const { data: departments } = await supabase.from('departments').select('id, name')
+  const deptMap = new Map(departments?.map(d => [d.id, d.name]) || [])
+
+  const announcements = (announcementsRaw || []).map(a => ({
+    ...a,
+    department_name: a.sender_role === 'DEPARTMENT' ? deptMap.get(a.sender_id) : undefined
+  }))
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-8">
