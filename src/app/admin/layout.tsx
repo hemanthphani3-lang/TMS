@@ -7,8 +7,10 @@ const adminLinks = [
   { label: "Departments", href: "/admin/departments", iconName: "departments" },
   { label: "Employees", href: "/admin/employees", iconName: "employees" },
   { label: "Holidays", href: "/admin/holidays", iconName: "calendar" },
-  { label: "Reports", href: "/admin/reports", iconName: "file" },
+  { label: "Announcements", href: "/admin/announcements", iconName: "bell" },
   { label: "Notifications", href: "/admin/notifications", iconName: "bell" },
+  { label: "Reports", href: "/admin/reports", iconName: "file" },
+  { label: "Settings", href: "/admin/settings", iconName: "settings" },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
