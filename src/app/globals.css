@@ -2,6 +2,9 @@
 
 @plugin "tailwindcss-animate";
 
+/* Completely disable dark mode even if OS is in dark mode */
+@custom-variant dark (&:is(.kill-dark-mode));
+
 @theme {
   --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
