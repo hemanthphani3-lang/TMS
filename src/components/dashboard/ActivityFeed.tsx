@@ -58,7 +58,13 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
                     {activity.activity_user_name}
                   </p>
                   <span suppressHydrationWarning className="text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">
-                    {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}
+                    {(() => {
+                      try {
+                        return formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })
+                      } catch (e) {
+                        return 'recently'
+                      }
+                    })()}
                   </span>
                 </div>
                 <p className="text-sm text-slate-600 mt-1">

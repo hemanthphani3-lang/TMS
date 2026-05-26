@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import { Users, Clock, CheckCircle2, XCircle, Target, Activity, AlertCircle } from "lucide-react"
 import { AnalyticsCard } from "@/components/dashboard/AnalyticsCard"
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed"
-import { AttendanceChart } from "@/components/dashboard/charts/AttendanceChart"
+import { AttendanceChart } from "@/components/dashboard/charts/DynamicCharts"
 import { RealtimeLeaderboard } from "@/components/productivity/RealtimeLeaderboard"
 import { ProductivityBadge } from "@/components/productivity/ProductivityBadge"
 
