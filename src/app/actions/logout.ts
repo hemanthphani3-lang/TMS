@@ -92,7 +92,10 @@ export async function requestLogoutAndSubmitWork(formData: FormData) {
     // Update existing to PENDING
     const { error: updateError } = await supabase
       .from('logout_requests')
-      .update({ approval_status: 'PENDING' })
+      .update({ 
+        approval_status: 'PENDING',
+        logout_request_time: new Date().toISOString()
+      })
       .eq('id', existingRequest.id)
     
     if (updateError) return { success: false, error: updateError.message }
@@ -131,7 +134,16 @@ export async function requestLogoutAndSubmitWork(formData: FormData) {
 
   if (wsError) return { success: false, error: wsError.message }
 
+  // Send Notification to Department Head
+  await supabase.from('notifications').insert({
+    user_id: employee.department_id,
+    title: 'Pending Logout Request',
+    message: 'An employee has requested to log out and submitted their daily work.',
+    type: 'SYSTEM'
+  })
+
   revalidatePath('/employee/dashboard')
+  revalidatePath('/department/logouts')
   return { success: true }
 }
 
