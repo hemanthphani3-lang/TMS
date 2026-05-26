@@ -196,3 +196,91 @@ export async function addTaskAttachment(taskId: string, fileUrl: string, fileTyp
 
   return { success: true }
 }
+
+// ==========================================
+// TASK CREATION (Admin Only)
+// ==========================================
+export async function createAdminTask(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: "Unauthorized" }
+
+  const title = formData.get('title') as string
+  const description = formData.get('description') as string
+  const assigned_employee_id = formData.get('assigned_employee_id') as string
+  const department_id = formData.get('department_id') as string
+  const priority = formData.get('priority') as string
+  const due_date = formData.get('due_date') as string
+  const estimated_time = formData.get('estimated_time') as string
+
+  if (!title || !description || !assigned_employee_id || !due_date || !department_id) {
+    return { success: false, error: "Missing required fields" }
+  }
+
+  // Create Task
+  // Admin assigns task to the employee's department, so the department sees it too.
+  const { data: task, error } = await supabase
+    .from('tasks')
+    .insert({
+      task_title: title,
+      task_description: description,
+      assigned_by_department: department_id, // We link it to the employee's department
+      department_id: department_id,
+      assigned_employee_id,
+      priority_level: priority || 'MEDIUM',
+      due_date,
+      estimated_completion_time: estimated_time || null
+    })
+    .select()
+    .single()
+
+  if (error) {
+    return { success: false, error: error.message }
+  }
+
+  // Handle Attachments
+  const rawFiles = formData.getAll('attachments') as File[]
+  const files = rawFiles.filter(f => f.size > 0 && f.name)
+
+  for (const file of files) {
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${task.id}-${Math.random()}.${fileExt}`
+    
+    const { error: uploadError } = await supabase.storage
+      .from('task-attachments')
+      .upload(fileName, file)
+
+    if (!uploadError) {
+      const { data: { publicUrl } } = supabase.storage
+        .from('task-attachments')
+        .getPublicUrl(fileName)
+      
+      await supabase.from('task_attachments').insert({
+        task_id: task.id,
+        uploaded_by: user.id, // Admin ID
+        file_url: publicUrl,
+        file_type: file.type || 'application/octet-stream'
+      })
+    }
+  }
+
+  // Log Activity
+  await supabase.from('task_activity_logs').insert({
+    task_id: task.id,
+    action_type: 'CREATED',
+    action_by: user.id, // Admin ID
+    action_description: `Task was created and assigned by Admin${files.length > 0 ? ` with ${files.length} attachment(s)` : ''}.`
+  })
+
+  // Notify the assigned employee
+  await supabase.from('notifications').insert({
+    user_id: assigned_employee_id,
+    title: 'New Task Assigned (Admin)',
+    message: `You have been assigned a new task by an Administrator: ${title}`,
+    type: 'TASK',
+    link_url: `/employee/tasks/${task.id}`
+  })
+
+  revalidatePath('/admin/tasks')
+  return { success: true }
+}

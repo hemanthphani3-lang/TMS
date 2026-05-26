@@ -24,9 +24,10 @@ interface Task {
 
 interface TasksTableProps {
   tasks: Task[]
+  basePath?: string
 }
 
-export function TasksTable({ tasks }: TasksTableProps) {
+export function TasksTable({ tasks, basePath = "/department/tasks" }: TasksTableProps) {
   const router = useRouter()
   const [search, setSearch] = useState("")
 
@@ -73,7 +74,7 @@ export function TasksTable({ tasks }: TasksTableProps) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: idx * 0.05 }}
                     key={task.id}
-                    onClick={() => router.push(`/department/tasks/${task.id}`)}
+                    onClick={() => router.push(`${basePath}/${task.id}`)}
                     className="hover:bg-blue-50/50 dark:hover:bg-slate-700/50 transition-colors group cursor-pointer"
                   >
                     <td className="p-4">

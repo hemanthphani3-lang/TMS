@@ -3,6 +3,7 @@ import { LayoutDashboard, Building2 } from "lucide-react"
 
 const adminLinks = [
   { label: "Dashboard", href: "/admin/dashboard", iconName: "dashboard" },
+  { label: "Tasks", href: "/admin/tasks", iconName: "tasks" },
   { label: "Departments", href: "/admin/departments", iconName: "departments" },
   { label: "Employees", href: "/admin/employees", iconName: "employees" },
   { label: "Holidays", href: "/admin/holidays", iconName: "calendar" },
