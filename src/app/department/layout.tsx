@@ -36,7 +36,7 @@ export default async function DepartmentLayout({ children }: { children: React.R
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <Sidebar title="Department" links={departmentLinks} />
-      <div className="md:pl-64 flex flex-col min-h-screen transition-all duration-300">
+      <div className="md:pl-64 pt-16 md:pt-0 flex flex-col min-h-screen transition-all duration-300">
         <main className="flex-1 w-full">
           {children}
         </main>
