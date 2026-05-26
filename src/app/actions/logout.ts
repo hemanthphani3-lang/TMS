@@ -159,6 +159,11 @@ export async function approveLogout(requestId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: "Unauthorized" }
 
+  const supabaseAdmin = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
   // Get request details
   const { data: request } = await supabase
     .from('logout_requests')
@@ -198,8 +203,8 @@ export async function approveLogout(requestId: string) {
     workingHoursText = `${h}h ${m}m`
   }
 
-  // Update request
-  const { error } = await supabase
+  // Update request using Admin to bypass RLS
+  const { error } = await supabaseAdmin
     .from('logout_requests')
     .update({
       approval_status: 'APPROVED',
@@ -212,9 +217,9 @@ export async function approveLogout(requestId: string) {
 
   if (error) return { success: false, error: error.message }
 
-  // Update attendance
+  // Update attendance using Admin to bypass RLS
   if (attendance) {
-    await supabase
+    await supabaseAdmin
       .from('attendance')
       .update({
         logout_time: logoutTime,
@@ -233,6 +238,11 @@ export async function rejectLogout(requestId: string, reason: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: "Unauthorized" }
 
+  const supabaseAdmin = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
   // Get request details
   const { data: request } = await supabase
     .from('logout_requests')
@@ -240,7 +250,7 @@ export async function rejectLogout(requestId: string, reason: string) {
     .eq('id', requestId)
     .single()
 
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from('logout_requests')
     .update({
       approval_status: 'REJECTED',

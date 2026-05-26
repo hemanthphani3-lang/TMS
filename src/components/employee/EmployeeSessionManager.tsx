@@ -14,6 +14,27 @@ export function EmployeeSessionManager({ children, links }: { children: React.Re
   useEffect(() => {
     // Listen for backend forceful logout when department approves the request
     let subscription: import('@supabase/supabase-js').RealtimeChannel
+    let pollInterval: NodeJS.Timeout | null = null
+
+    const checkLogoutApproved = async (userId: string) => {
+      const nowMs = new Date()
+      const istOffset = 5.5 * 60 * 60 * 1000
+      const todayIST = new Date(nowMs.getTime() + istOffset).toISOString().split('T')[0]
+
+      const { data } = await supabase
+        .from('logout_requests')
+        .select('approval_status')
+        .eq('employee_id', userId)
+        .eq('attendance_date', todayIST)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (data?.approval_status === 'APPROVED') {
+        router.push('/employee/identity-check')
+        router.refresh()
+      }
+    }
 
     const setupRealtime = async () => {
       const { data: { user } } = await supabase.auth.getUser()
@@ -29,17 +50,32 @@ export function EmployeeSessionManager({ children, links }: { children: React.Re
           filter: `employee_id=eq.${user.id}`
         }, async (payload: { new: { work_status?: string } }) => {
           if (payload.new.work_status === 'LOGGED_OUT') {
-            // Logout approved — redirect to identity check so employee can re-check-in
-            // Do NOT sign out — they are still authenticated
+            router.push('/employee/identity-check')
+            router.refresh()
+          }
+        })
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'logout_requests',
+          filter: `employee_id=eq.${user.id}`
+        }, async (payload: { new: { approval_status?: string } }) => {
+          if (payload.new.approval_status === 'APPROVED') {
             router.push('/employee/identity-check')
             router.refresh()
           }
         })
         .subscribe()
+
+      // Polling fallback: check every 10 seconds for approval
+      pollInterval = setInterval(() => checkLogoutApproved(user.id), 10000)
     }
 
     setupRealtime()
-    return () => { if (subscription) supabase.removeChannel(subscription) }
+    return () => {
+      if (subscription) supabase.removeChannel(subscription)
+      if (pollInterval) clearInterval(pollInterval)
+    }
   }, [supabase, router])
 
   const handleLogoutIntercept = async () => {
