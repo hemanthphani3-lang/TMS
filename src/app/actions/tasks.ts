@@ -272,6 +272,14 @@ export async function createAdminTask(formData: FormData) {
     action_description: `Task was created and assigned by Admin${files.length > 0 ? ` with ${files.length} attachment(s)` : ''}.`
   })
 
+  // Get employee name for notification
+  const { data: employeeData } = await supabase
+    .from('employees')
+    .select('employee_name')
+    .eq('id', assigned_employee_id)
+    .single()
+  const employeeName = employeeData?.employee_name || 'an employee'
+
   // Notify the assigned employee
   await supabase.from('notifications').insert({
     user_id: assigned_employee_id,
@@ -279,6 +287,15 @@ export async function createAdminTask(formData: FormData) {
     message: `You have been assigned a new task by an Administrator: ${title}`,
     type: 'TASK',
     link_url: `/employee/tasks/${task.id}`
+  })
+
+  // Notify the department
+  await supabase.from('notifications').insert({
+    user_id: department_id,
+    title: 'Task Assigned by Admin',
+    message: `Admin assigned a new task to ${employeeName}: ${title}`,
+    type: 'TASK',
+    link_url: `/department/tasks/${task.id}`
   })
 
   revalidatePath('/admin/tasks')
