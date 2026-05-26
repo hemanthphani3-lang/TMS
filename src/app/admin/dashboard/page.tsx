@@ -18,11 +18,12 @@ import type { LeaderboardEntry } from "@/components/productivity/LeaderboardTabl
 import Link from "next/link"
 
 export default async function AdminDashboard(props: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
-  const searchParams = await props.searchParams
-  const dept_id = searchParams.dept_id as string | undefined
+  try {
+    const searchParams = await props.searchParams
+    const dept_id = searchParams.dept_id as string | undefined
 
-  const supabase = await createClient()
-  const { data: { user: supabaseUser } } = await supabase.auth.getUser()
+    const supabase = await createClient()
+    const { data: { user: supabaseUser } } = await supabase.auth.getUser()
 
   // if (!user) redirect("/login")
   // if (role?.role !== 'ADMIN') redirect("/employee/dashboard")
@@ -347,4 +348,16 @@ export default async function AdminDashboard(props: { searchParams: Promise<{ [k
 
     </div>
   )
+  } catch (error: any) {
+    return (
+      <div className="p-8 max-w-4xl mx-auto bg-red-50 text-red-900 border border-red-200 rounded-xl mt-8">
+        <h2 className="text-2xl font-bold mb-4">Server Component Crash (Raw)</h2>
+        <div className="bg-white p-4 rounded border border-red-100 overflow-auto text-sm font-mono whitespace-pre-wrap">
+          {error?.message || String(error)}
+          <br /><br />
+          {error?.stack}
+        </div>
+      </div>
+    )
+  }
 }
