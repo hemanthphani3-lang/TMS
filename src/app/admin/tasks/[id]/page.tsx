@@ -35,7 +35,7 @@ export default async function AdminTaskDetailsPage({ params }: { params: Promise
     const results = await Promise.all([
       supabaseAdmin
         .from('tasks')
-        .select('*, employees!assigned_employee_id(*, departments(department_name))')
+        .select('*, employees!assigned_employee_id(*, departments!department_id(department_name))')
         .eq('id', taskId)
         .maybeSingle(),
       supabaseAdmin

@@ -33,7 +33,7 @@ export default async function AdminTasksPage() {
       employees:assigned_employee_id (
         employee_name,
         profile_photo,
-        departments ( department_name )
+        departments!department_id ( department_name )
       )
     `)
     .order('created_at', { ascending: false })
