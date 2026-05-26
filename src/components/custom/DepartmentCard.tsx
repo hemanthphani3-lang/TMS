@@ -3,6 +3,7 @@ import { Mail, Users } from "lucide-react"
 import { StatusBadge } from "./StatusBadge"
 import { UserAvatar } from "./UserAvatar"
 import Link from "next/link"
+import { ResetPasswordButton } from "@/components/settings/ResetPasswordButton"
 
 interface DepartmentCardProps {
   id: string
@@ -31,7 +32,12 @@ export function DepartmentCard({ id, name, code, email, headName, status, photo 
               <p className="text-xs font-semibold text-slate-400">Code: {code}</p>
             </div>
           </div>
-          <StatusBadge status={status} />
+          <div className="flex flex-col items-end gap-2">
+            <StatusBadge status={status} />
+            <div onClick={(e) => e.preventDefault()}>
+              <ResetPasswordButton userId={id} userName={name} />
+            </div>
+          </div>
         </div>
         
         <div className="space-y-2 mt-6">

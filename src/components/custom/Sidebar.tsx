@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
-import { LogOut, LayoutDashboard, Building2, Users, User, Calendar, ListTodo, Menu, X, FileText, Bell, Megaphone } from "lucide-react"
+import { LogOut, LayoutDashboard, Building2, Users, User, Calendar, ListTodo, Menu, X, FileText, Bell, Megaphone, Settings as SettingsIcon } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 
 import { useRouter } from "next/navigation"
@@ -20,6 +20,7 @@ const iconMap: Record<string, React.ElementType> = {
   file: FileText,
   bell: Bell,
   megaphone: Megaphone,
+  settings: SettingsIcon,
 }
 
 interface SidebarProps {

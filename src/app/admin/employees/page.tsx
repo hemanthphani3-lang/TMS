@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/custom/PageHeader"
 import { Card } from "@/components/ui/card"
 import { Users, Plus, Building2, Calendar, Phone } from "lucide-react"
 import Link from "next/link"
+import { ResetPasswordButton } from "@/components/settings/ResetPasswordButton"
 
 export const revalidate = 0
 
@@ -59,12 +60,13 @@ export default async function AdminEmployeesPage() {
                   <th className="px-6 py-4 text-sm font-semibold text-slate-600">Role</th>
                   <th className="px-6 py-4 text-sm font-semibold text-slate-600">Contact</th>
                   <th className="px-6 py-4 text-sm font-semibold text-slate-600">Joining Date</th>
+                  <th className="px-6 py-4 text-sm font-semibold text-slate-600 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {employees?.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
+                    <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
                       No employees found. Click "Add Employee" to create one.
                     </td>
                   </tr>
@@ -105,6 +107,9 @@ export default async function AdminEmployeesPage() {
                           <Calendar className="w-4 h-4 text-slate-400" />
                           {new Date(emp.joining_date).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}
                         </div>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <ResetPasswordButton userId={emp.id} userName={emp.employee_name} />
                       </td>
                     </tr>
                   ))
