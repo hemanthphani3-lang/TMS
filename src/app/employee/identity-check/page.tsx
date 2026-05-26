@@ -5,25 +5,30 @@ import ActionButtons from "./ActionButtons"
 
 export default async function EmployeeIdentityCheck() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch (_e) {}
 
   if (!user) redirect("/login")
 
-  // Fetch from the new 'employees' table
+  // Fetch employee profile + department name
   const { data: employee } = await supabase
     .from('employees')
     .select(`
       *,
       departments!department_id(department_name)
     `)
-    .eq('id', user.id)
+    .eq('id', user!.id)
     .single()
 
   const departmentName = (employee?.departments as { department_name: string } | null)?.department_name || "Unassigned"
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-4">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl shadow-[#0A1A2F]/5 p-8 border border-slate-100 text-center">
+      <div className="relative w-full max-w-sm bg-white rounded-2xl shadow-xl shadow-[#0A1A2F]/5 p-8 border border-slate-100 text-center">
 
         {/* Top accent */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#0066FF] to-[#00D4FF] rounded-t-2xl" />
@@ -48,7 +53,7 @@ export default async function EmployeeIdentityCheck() {
 
         {/* Details */}
         <div className="space-y-1 mb-7">
-          <h3 className="text-xl font-bold text-[#0A1A2F]">{employee?.employee_name || user.email}</h3>
+          <h3 className="text-xl font-bold text-[#0A1A2F]">{employee?.employee_name || user!.email}</h3>
           <p className="text-[#0066FF] text-sm font-semibold">{employee?.designation || "Employee"}</p>
           <span className="inline-block mt-2 px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-semibold">
             {departmentName}
@@ -56,9 +61,9 @@ export default async function EmployeeIdentityCheck() {
         </div>
 
         {/* Action Buttons */}
-        <ActionButtons 
-          employeeId={employee?.id || ""} 
-          departmentId={employee?.department_id || ""} 
+        <ActionButtons
+          employeeId={employee?.id || ""}
+          departmentId={employee?.department_id || ""}
         />
       </div>
     </div>
