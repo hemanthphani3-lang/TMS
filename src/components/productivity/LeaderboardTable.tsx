@@ -42,7 +42,7 @@ export function LeaderboardTable({ entries, title = "Top Performers" }: Leaderbo
             </tr>
           </thead>
           <tbody>
-            {entries.map((entry, idx) => (
+            {entries.map((entry, _idx) => (
               <tr key={entry.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors last:border-0">
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-50 border border-slate-100">

@@ -2,9 +2,8 @@
 
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { UploadCloud, Loader2, File, FileText, Image as ImageIcon } from "lucide-react"
+import { UploadCloud, Loader2 } from "lucide-react"
 import { addTaskAttachment } from "@/app/actions/tasks"
-import { Button } from "@/components/ui/button"
 
 export function TaskAttachmentUploader({ taskId }: { taskId: string }) {
   const [isUploading, setIsUploading] = useState(false)
@@ -39,7 +38,7 @@ export function TaskAttachmentUploader({ taskId }: { taskId: string }) {
         .from('task-attachments')
         .upload(filePath, file)
 
-      if (uploadError) throw uploadError
+      if (uploadError) throw new Error(uploadError.message || "Upload failed")
 
       // 2. Get Public URL
       const { data: { publicUrl } } = supabase.storage

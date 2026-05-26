@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Bell, Clock, AlertCircle, X, Check } from 'lucide-react'
+import { Bell, Clock, AlertCircle, Check } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 
