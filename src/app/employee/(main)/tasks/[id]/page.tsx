@@ -21,17 +21,26 @@ export default async function EmployeeTaskDetailsPage({ params }: { params: Prom
   if (!user) redirect('/login')
 
   // Fetch task, comments, logs, and current employee profile — all in parallel
-  const [
-    { data: task },
-    { data: rawComments },
-    { data: logs },
-    { data: empProfile }
-  ] = await Promise.all([
-    supabase.from('tasks').select('*').eq('id', taskId).eq('assigned_employee_id', user!.id).single(),
-    supabase.from('task_comments').select('id, comment_text, created_at, user_id').eq('task_id', taskId).order('created_at', { ascending: true }),
-    supabase.from('task_activity_logs').select('*').eq('task_id', taskId).order('created_at', { ascending: false }),
-    supabase.from('employees').select('employee_name, profile_photo').eq('id', user!.id).maybeSingle()
-  ])
+  let task = null
+  let rawComments = []
+  let logs = []
+  let empProfile = null
+
+  try {
+    const results = await Promise.all([
+      supabase.from('tasks').select('*').eq('id', taskId).eq('assigned_employee_id', user!.id).maybeSingle(),
+      supabase.from('task_comments').select('id, comment_text, created_at, user_id').eq('task_id', taskId).order('created_at', { ascending: true }),
+      supabase.from('task_activity_logs').select('*').eq('task_id', taskId).order('created_at', { ascending: false }),
+      supabase.from('employees').select('employee_name, profile_photo').eq('id', user!.id).maybeSingle()
+    ])
+    
+    task = results[0].data
+    rawComments = results[1].data || []
+    logs = results[2].data || []
+    empProfile = results[3].data
+  } catch (error) {
+    console.error("Error fetching task details:", error)
+  }
 
   if (!task) {
     return (

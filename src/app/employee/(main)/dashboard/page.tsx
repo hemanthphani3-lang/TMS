@@ -27,11 +27,7 @@ export default async function EmployeeDashboard() {
     .eq('id', user.id)
     .single()
 
-  // Trigger productivity calculation & reminders lazily in the background without blocking the render
-  if (employee?.department_id) {
-    ProductivityEngine.calculateEmployeeProductivity(user.id, employee.department_id).catch(console.error)
-    ReminderEngine.evaluateEmployeeReminders(user.id, employee.department_id).catch(console.error)
-  }
+
 
   // Fetch today's attendance (IST-aware)
   const now = new Date()

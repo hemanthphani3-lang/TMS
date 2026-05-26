@@ -21,34 +21,43 @@ export default async function DepartmentTaskDetailsPage({ params }: { params: Pr
   if (!user) redirect('/login')
 
   // Fetch task, comments, activity logs, and current user's department profile — all in parallel
-  const [
-    { data: task },
-    { data: rawComments },
-    { data: logs },
-    { data: deptProfile }
-  ] = await Promise.all([
-    supabase
-      .from('tasks')
-      .select('*, employees!assigned_employee_id(*)')
-      .eq('id', taskId)
-      .eq('department_id', user!.id)
-      .single(),
-    supabase
-      .from('task_comments')
-      .select('id, comment_text, created_at, user_id')
-      .eq('task_id', taskId)
-      .order('created_at', { ascending: true }),
-    supabase
-      .from('task_activity_logs')
-      .select('*')
-      .eq('task_id', taskId)
-      .order('created_at', { ascending: false }),
-    supabase
-      .from('departments')
-      .select('department_name')
-      .eq('id', user!.id)
-      .maybeSingle()
-  ])
+  let task = null
+  let rawComments = []
+  let logs = []
+  let deptProfile = null
+
+  try {
+    const results = await Promise.all([
+      supabase
+        .from('tasks')
+        .select('*, employees!assigned_employee_id(*)')
+        .eq('id', taskId)
+        .eq('department_id', user!.id)
+        .maybeSingle(),
+      supabase
+        .from('task_comments')
+        .select('id, comment_text, created_at, user_id')
+        .eq('task_id', taskId)
+        .order('created_at', { ascending: true }),
+      supabase
+        .from('task_activity_logs')
+        .select('*')
+        .eq('task_id', taskId)
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('departments')
+        .select('department_name')
+        .eq('id', user!.id)
+        .maybeSingle()
+    ])
+    
+    task = results[0].data
+    rawComments = results[1].data || []
+    logs = results[2].data || []
+    deptProfile = results[3].data
+  } catch (error) {
+    console.error("Error fetching task details:", error)
+  }
 
   if (!task) {
     return (
