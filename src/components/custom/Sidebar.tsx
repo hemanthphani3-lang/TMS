@@ -10,8 +10,6 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { useState, useEffect } from "react"
 
-const EmojiSpeaker = ({ className }: { className?: string }) => <span className={className} style={{ fontSize: '1.25rem', lineHeight: 1 }}>📣</span>
-
 const iconMap: Record<string, React.ElementType> = {
   dashboard: LayoutDashboard,
   departments: Building2,
@@ -22,7 +20,6 @@ const iconMap: Record<string, React.ElementType> = {
   file: FileText,
   bell: Bell,
   megaphone: Megaphone,
-  speakerEmoji: EmojiSpeaker,
 }
 
 interface SidebarProps {
