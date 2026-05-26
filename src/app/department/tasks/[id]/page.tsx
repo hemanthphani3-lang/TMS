@@ -20,11 +20,12 @@ export default async function DepartmentTaskDetailsPage({ params }: { params: Pr
 
   if (!user) redirect('/login')
 
-  // Fetch task, comments, and activity logs all in parallel
+  // Fetch task, comments, activity logs, and current user's department profile — all in parallel
   const [
     { data: task },
-    { data: comments },
-    { data: logs }
+    { data: rawComments },
+    { data: logs },
+    { data: deptProfile }
   ] = await Promise.all([
     supabase
       .from('tasks')
@@ -34,14 +35,19 @@ export default async function DepartmentTaskDetailsPage({ params }: { params: Pr
       .single(),
     supabase
       .from('task_comments')
-      .select('*')
+      .select('id, comment_text, created_at, user_id')
       .eq('task_id', taskId)
       .order('created_at', { ascending: true }),
     supabase
       .from('task_activity_logs')
       .select('*')
       .eq('task_id', taskId)
-      .order('created_at', { ascending: false })
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('departments')
+      .select('department_name')
+      .eq('id', user!.id)
+      .maybeSingle()
   ])
 
   if (!task) {
@@ -56,7 +62,39 @@ export default async function DepartmentTaskDetailsPage({ params }: { params: Pr
     )
   }
 
-  const emp = task.employees as unknown as { employee_name: string, profile_photo: string | null, designation: string }
+  const emp = task.employees as unknown as { id: string, employee_name: string, profile_photo: string | null, designation: string }
+
+  // Collect all unique commenter IDs (excluding current user — we already have their name)
+  const commenterIds = [...new Set((rawComments || []).map(c => c.user_id).filter(id => id !== user!.id))]
+
+  // Resolve commenter names from both employees and departments tables in parallel
+  const [{ data: empCommenters }, { data: deptCommenters }] = await Promise.all([
+    commenterIds.length > 0
+      ? supabase.from('employees').select('id, employee_name, profile_photo, designation').in('id', commenterIds)
+      : Promise.resolve({ data: [] }),
+    commenterIds.length > 0
+      ? supabase.from('departments').select('id, department_name').in('id', commenterIds)
+      : Promise.resolve({ data: [] })
+  ])
+
+  // Build a lookup map: user_id → { name, role, avatar }
+  const senderMap = new Map<string, { name: string; role: string; avatar?: string }>()
+
+  for (const e of (empCommenters || [])) {
+    senderMap.set(e.id, { name: e.employee_name, role: 'Employee', avatar: e.profile_photo || undefined })
+  }
+  for (const d of (deptCommenters || [])) {
+    senderMap.set(d.id, { name: d.department_name, role: 'Department' })
+  }
+
+  // Enrich comments with sender info
+  const comments = (rawComments || []).map(c => {
+    if (c.user_id === user!.id) {
+      return { ...c, sender_name: deptProfile?.department_name || 'You', sender_role: 'Department' }
+    }
+    const sender = senderMap.get(c.user_id)
+    return { ...c, sender_name: sender?.name || 'Unknown', sender_role: sender?.role || '', sender_avatar: sender?.avatar }
+  })
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-4 sm:p-8">
@@ -104,35 +142,30 @@ export default async function DepartmentTaskDetailsPage({ params }: { params: Pr
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
+            {/* Description */}
             <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-100 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
                 <AlignLeft className="w-5 h-5 text-slate-400" />
                 <h3 className="font-bold text-slate-900 text-lg">Description</h3>
               </div>
-              <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">
-                {task.task_description}
-              </p>
+              <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">{task.task_description}</p>
             </div>
 
-            {/* Discussion / Comments */}
+            {/* WhatsApp-style Discussion */}
             <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-100 shadow-sm">
               <h3 className="font-bold text-slate-900 text-lg mb-6">Discussion</h3>
-              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 mb-4">
-                {comments?.length === 0 && (
-                  <p className="text-slate-500 text-center py-4">No comments yet. Start the conversation!</p>
-                )}
-                {comments?.map(comment => (
-                  <div key={comment.id} className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                    <p className="text-xs font-bold text-slate-400 mb-1">{new Date(comment.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</p>
-                    <p className="text-slate-800 text-sm">{comment.comment_text}</p>
-                  </div>
-                ))}
-              </div>
-              <TaskCommentBox taskId={task.id} />
+              <TaskCommentBox
+                taskId={task.id}
+                initialComments={comments}
+                currentUserId={user!.id}
+                currentUserName={deptProfile?.department_name || 'Department'}
+                currentUserRole="Department"
+              />
             </div>
           </div>
 
           <div className="lg:col-span-1 space-y-6">
+            {/* Assignee */}
             <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
               <h3 className="font-bold text-slate-900 mb-4">Assignee</h3>
               <div className="flex items-center gap-4">
@@ -151,6 +184,7 @@ export default async function DepartmentTaskDetailsPage({ params }: { params: Pr
               </div>
             </div>
 
+            {/* Activity Log */}
             <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
               <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
                 <Clock className="w-4 h-4 text-slate-400" />

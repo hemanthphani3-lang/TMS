@@ -13,34 +13,55 @@ import { TaskAttachmentUploader } from "@/components/tasks/TaskAttachmentUploade
 export default async function EmployeeTaskDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: taskId } = await params
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch (_e) {}
   if (!user) redirect('/login')
 
-  // Fetch task
-  const { data: task } = await supabase
-    .from('tasks')
-    .select('*')
-    .eq('id', taskId)
-    .eq('assigned_employee_id', user.id)
-    .single()
+  // Fetch task, comments, logs, and current employee profile — all in parallel
+  const [
+    { data: task },
+    { data: rawComments },
+    { data: logs },
+    { data: empProfile }
+  ] = await Promise.all([
+    supabase.from('tasks').select('*').eq('id', taskId).eq('assigned_employee_id', user!.id).single(),
+    supabase.from('task_comments').select('id, comment_text, created_at, user_id').eq('task_id', taskId).order('created_at', { ascending: true }),
+    supabase.from('task_activity_logs').select('*').eq('task_id', taskId).order('created_at', { ascending: false }),
+    supabase.from('employees').select('employee_name, profile_photo').eq('id', user!.id).maybeSingle()
+  ])
 
   if (!task) {
-    return <div className="p-8">Task not found or unauthorized.</div>
+    return (
+      <div className="p-8 text-center">
+        <h2 className="text-xl font-bold text-slate-900 mb-2">Task not found</h2>
+        <Link href="/employee/tasks" className="text-[#0066FF] font-medium hover:underline">← Back to Tasks</Link>
+      </div>
+    )
   }
 
-  // Fetch comments
-  const { data: comments } = await supabase
-    .from('task_comments')
-    .select('*')
-    .eq('task_id', taskId)
-    .order('created_at', { ascending: true })
+  // Resolve sender names for all other commenters
+  const commenterIds = [...new Set((rawComments || []).map(c => c.user_id).filter((id: string) => id !== user!.id))]
+  const [{ data: empCommenters }, { data: deptCommenters }] = await Promise.all([
+    commenterIds.length > 0
+      ? supabase.from('employees').select('id, employee_name, profile_photo').in('id', commenterIds)
+      : Promise.resolve({ data: [] }),
+    commenterIds.length > 0
+      ? supabase.from('departments').select('id, department_name').in('id', commenterIds)
+      : Promise.resolve({ data: [] })
+  ])
 
-  // Fetch activity logs
-  const { data: logs } = await supabase
-    .from('task_activity_logs')
-    .select('*')
-    .eq('task_id', taskId)
-    .order('created_at', { ascending: false })
+  const senderMap = new Map<string, { name: string; role: string; avatar?: string }>()
+  for (const e of (empCommenters || [])) senderMap.set(e.id, { name: e.employee_name, role: 'Employee', avatar: e.profile_photo || undefined })
+  for (const d of (deptCommenters || [])) senderMap.set(d.id, { name: d.department_name, role: 'Department' })
+
+  const comments = (rawComments || []).map((c: any) => {
+    if (c.user_id === user!.id) return { ...c, sender_name: empProfile?.employee_name || 'Me', sender_role: 'Employee', sender_avatar: empProfile?.profile_photo || undefined }
+    const sender = senderMap.get(c.user_id)
+    return { ...c, sender_name: sender?.name || 'Unknown', sender_role: sender?.role || '', sender_avatar: sender?.avatar }
+  })
 
   return (
     <div className="p-4 sm:p-8">
@@ -123,18 +144,14 @@ export default async function EmployeeTaskDetailsPage({ params }: { params: Prom
 
             <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-100 shadow-sm">
               <h3 className="font-bold text-slate-900 text-lg mb-6">Discussion</h3>
-              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-                {comments?.length === 0 && (
-                  <p className="text-slate-500 text-center py-4">No comments yet. Start the conversation!</p>
-                )}
-                {comments?.map(comment => (
-                  <div key={comment.id} className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                    <p className="text-xs font-bold text-slate-400 mb-1">{new Date(comment.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short'})}</p>
-                    <p className="text-slate-800 text-sm">{comment.comment_text}</p>
-                  </div>
-                ))}
-              </div>
-              <TaskCommentBox taskId={task.id} />
+              <TaskCommentBox
+                taskId={task.id}
+                initialComments={comments}
+                currentUserId={user!.id}
+                currentUserName={empProfile?.employee_name || 'Me'}
+                currentUserRole="Employee"
+                currentUserAvatar={empProfile?.profile_photo || undefined}
+              />
             </div>
           </div>
 
