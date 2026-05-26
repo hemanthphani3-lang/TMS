@@ -44,7 +44,7 @@ export default async function EmployeeLeavePage() {
               
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-slate-700">Leave Type</label>
-                <select name="leaveType" required className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none focus:ring-2 focus:ring-[#0066FF]/20 transition-all">
+                <select name="leaveType" required className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-slate-900 outline-none focus:ring-2 focus:ring-[#0066FF]/20 transition-all">
                   <option value="">Select type...</option>
                   <option value="SICK_LEAVE">Sick Leave</option>
                   <option value="CASUAL_LEAVE">Casual Leave</option>
@@ -56,17 +56,17 @@ export default async function EmployeeLeavePage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-sm font-semibold text-slate-700">Start Date</label>
-                  <input type="date" name="startDate" required className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none focus:ring-2 focus:ring-[#0066FF]/20 transition-all text-sm" />
+                  <input type="date" name="startDate" required className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-slate-900 outline-none focus:ring-2 focus:ring-[#0066FF]/20 transition-all text-sm" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-sm font-semibold text-slate-700">End Date</label>
-                  <input type="date" name="endDate" required className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none focus:ring-2 focus:ring-[#0066FF]/20 transition-all text-sm" />
+                  <input type="date" name="endDate" required className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-slate-900 outline-none focus:ring-2 focus:ring-[#0066FF]/20 transition-all text-sm" />
                 </div>
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-slate-700">Reason</label>
-                <textarea name="reason" rows={3} required className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none focus:ring-2 focus:ring-[#0066FF]/20 transition-all resize-none" placeholder="Provide a brief reason..."></textarea>
+                <textarea name="reason" rows={3} required className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-slate-900 outline-none focus:ring-2 focus:ring-[#0066FF]/20 transition-all resize-none" placeholder="Provide a brief reason..."></textarea>
               </div>
 
               <button type="submit" className="w-full bg-[#0066FF] hover:bg-[#0052CC] text-white py-3 rounded-xl font-semibold transition-colors mt-2">
