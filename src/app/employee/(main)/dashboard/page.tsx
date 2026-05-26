@@ -12,7 +12,11 @@ import Link from "next/link"
 
 export default async function EmployeeDashboard() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch (e) {}
 
   if (!user) redirect("/login")
 

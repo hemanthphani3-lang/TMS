@@ -21,7 +21,15 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch (error) {
+    console.error('[Middleware] Error getting user:', error)
+    // If getUser fails (e.g. invalid JWT cookie), we treat them as logged out
+    // and clear the stale cookies by doing nothing (user remains null)
+  }
 
   const pathname = request.nextUrl.pathname
   const isLoginRoute = pathname.startsWith('/login')

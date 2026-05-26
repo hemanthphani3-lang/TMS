@@ -15,7 +15,13 @@ export default async function AdminDashboard(props: { searchParams: Promise<{ [k
     const dept_id = searchParams.dept_id as string | undefined
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    let user = null
+    try {
+      const { data } = await supabase.auth.getUser()
+      user = data.user
+    } catch (e) {
+      // ignore, handle via redirect below
+    }
 
     if (!user) redirect("/login")
 

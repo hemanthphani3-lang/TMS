@@ -10,9 +10,13 @@ import { ProductivityBadge } from "@/components/productivity/ProductivityBadge"
 export default async function DepartmentDashboard() {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    let user = null
+    try {
+      const { data } = await supabase.auth.getUser()
+      user = data.user
+    } catch (e) {}
 
-  if (!user) redirect("/login")
+    if (!user) redirect("/login")
 
   // Fetch today's attendance variables for queries
   const today = new Date().toISOString().split('T')[0]
