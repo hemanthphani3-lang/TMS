@@ -92,7 +92,7 @@ export default async function DepartmentDashboard() {
     .sort((a, b) => a.rank - b.rank)
 
   // Identify delayed employees 
-  const delayedEmployeeIds = [...new Set(tasks?.filter(t => t.task_status === 'DELAYED').map(t => t.assigned_employee_id))]
+  const delayedEmployeeIds = [...new Set((tasks || []).filter(t => t.task_status === 'DELAYED').map(t => t.assigned_employee_id))]
   const delayedEmployees = employees?.filter(e => delayedEmployeeIds.includes(e.id)) || []
 
   // Avg productivity score for dept

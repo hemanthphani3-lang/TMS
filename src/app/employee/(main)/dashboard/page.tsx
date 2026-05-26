@@ -173,7 +173,7 @@ export default async function EmployeeDashboard() {
             </div>
             
             <div className="space-y-3">
-              {tasks?.filter(t => ['PENDING', 'IN_PROGRESS', 'WAITING_APPROVAL'].includes(t.task_status)).slice(0, 5).map(task => (
+              {(tasks || []).filter(t => ['PENDING', 'IN_PROGRESS', 'WAITING_APPROVAL'].includes(t.task_status)).slice(0, 5).map(task => (
                 <div key={task.id} className="p-4 rounded-xl border border-slate-100 bg-slate-50 flex items-center justify-between hover:border-blue-200 hover:bg-blue-50/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg ${task.priority_level === 'CRITICAL' ? 'bg-red-100 text-red-600' : task.priority_level === 'HIGH' ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}`}>

@@ -138,20 +138,19 @@ export async function approveLogout(requestId: string) {
     .lte('created_at', attEnd)
     .maybeSingle()
 
-  // Calculate working hours
-  const now = new Date()
-  const logoutTime = now.toLocaleTimeString('en-US', { hour12: false })
+  // Use the time the employee REQUESTED the logout, not the time it was approved!
+  const requestDate = new Date(request.created_at)
+  const approvalDate = new Date() // Time manager actually clicks approve
+  
+  const logoutTime = requestDate.toLocaleTimeString('en-US', { hour12: false })
   
   let workingHoursText = "Unknown"
   if (attendance && attendance.check_in_time) {
     const inDate = new Date(attendance.check_in_time)
-    const inH = inDate.getHours()
-    const inM = inDate.getMinutes()
-    const outH = now.getHours()
-    const outM = now.getMinutes()
+    const diffMs = requestDate.getTime() - inDate.getTime()
     
-    let totalMins = (outH * 60 + outM) - (inH * 60 + inM)
-    if (totalMins < 0) totalMins += 24 * 60 // Crossed midnight
+    // Ensure we don't get negative times if clocks are slightly out of sync
+    const totalMins = Math.max(0, Math.floor(diffMs / 60000))
     
     const h = Math.floor(totalMins / 60)
     const m = totalMins % 60
@@ -164,8 +163,8 @@ export async function approveLogout(requestId: string) {
     .update({
       approval_status: 'APPROVED',
       approved_by_department: user.id,
-      approval_time: now.toISOString(),
-      logout_time: now.toISOString(),
+      approval_time: approvalDate.toISOString(),
+      logout_time: requestDate.toISOString(), // Real logout time
       total_working_hours: workingHoursText
     })
     .eq('id', requestId)

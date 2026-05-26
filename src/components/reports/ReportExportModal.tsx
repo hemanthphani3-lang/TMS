@@ -43,7 +43,14 @@ export function ReportExportModal({ role, departmentId, employeeId }: ReportExpo
         if (role === 'EMPLOYEE' && employeeId) query = query.eq('employee_id', employeeId)
         
         const { data: attendanceData } = await query
-        data = (attendanceData || []).map(a => ({
+        
+        // Deduplicate records to prevent showing multiple check-ins per day for the same employee
+        // This resolves issues where rapid clicks created duplicate DB records
+        const uniqueAttendance = Array.from(new Map(
+          (attendanceData || []).map(a => [`${a.employee_id}-${a.created_at.split('T')[0]}`, a])
+        ).values())
+
+        data = uniqueAttendance.map(a => ({
           Date: a.created_at.split('T')[0],
           Employee: a.employees?.employee_name || '-',
           Code: a.employees?.employee_code || '-',

@@ -137,7 +137,7 @@ export default async function AdminDashboard(props: { searchParams: Promise<{ [k
     }
   })
 
-  const taskChartData = departments?.filter(d => dept_id ? d.id === dept_id : true).map(dept => {
+  const taskChartData = (departments || []).filter(d => dept_id ? d.id === dept_id : true).map(dept => {
     const deptTasks = tasks?.filter(t => t.department_id === dept.id) || []
     return {
       name: dept.department_name.substring(0, 3).toUpperCase(),
@@ -145,7 +145,7 @@ export default async function AdminDashboard(props: { searchParams: Promise<{ [k
       pending: deptTasks.filter(t => ['PENDING', 'IN_PROGRESS', 'WAITING_APPROVAL'].includes(t.task_status)).length,
       delayed: deptTasks.filter(t => t.task_status === 'DELAYED').length
     }
-  }) || []
+  })
 
   const selectedDepartment = departments?.find(d => d.id === dept_id)
 
