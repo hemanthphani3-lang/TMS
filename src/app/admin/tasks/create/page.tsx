@@ -11,7 +11,7 @@ export default async function AdminCreateTaskPage() {
   // Fetch all employees with their department names to pass to the dropdown
   const { data: employees, error } = await supabase
     .from("employees")
-    .select("id, employee_name, employee_code, department_id, departments!department_id(department_name)")
+    .select("id, employee_name, employee_code, designation, department_id, departments!department_id(department_name)")
     .order("employee_name")
 
   if (error) {

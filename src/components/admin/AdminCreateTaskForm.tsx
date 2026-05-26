@@ -16,6 +16,7 @@ interface Employee {
   id: string
   employee_name: string
   employee_code: string
+  designation?: string
   department_id: string
   departments: {
     department_name: string
@@ -31,6 +32,7 @@ export function AdminCreateTaskForm({ employees }: { employees: Employee[] }) {
   const [fileNames, setFileNames] = useState<string[]>([])
   
   const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("")
+  const [selectedDesignation, setSelectedDesignation] = useState<string>("")
   
   // Format employees to show their department correctly
   const formattedEmployees = employees.map(emp => ({
@@ -39,10 +41,13 @@ export function AdminCreateTaskForm({ employees }: { employees: Employee[] }) {
   }))
 
   const uniqueDepartments = Array.from(new Map(formattedEmployees.map(emp => [emp.department_id, { id: emp.department_id, name: emp.deptName }])).values())
+  const uniqueDesignations = Array.from(new Set(formattedEmployees.map(emp => emp.designation).filter(Boolean))) as string[]
   
-  const filteredEmployees = selectedDepartmentId 
-    ? formattedEmployees.filter(emp => emp.department_id === selectedDepartmentId)
-    : formattedEmployees
+  const filteredEmployees = formattedEmployees.filter(emp => {
+    const matchesDept = selectedDepartmentId ? emp.department_id === selectedDepartmentId : true
+    const matchesRole = selectedDesignation ? emp.designation === selectedDesignation : true
+    return matchesDept && matchesRole
+  })
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -105,7 +110,7 @@ export function AdminCreateTaskForm({ employees }: { employees: Employee[] }) {
               </div>
             )}
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4 border-b border-slate-100 dark:border-slate-700">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-4 border-b border-slate-100 dark:border-slate-700">
               {/* Department Dropdown (Filter) */}
               <div className="space-y-2">
                 <Label htmlFor="department_filter" className="flex items-center gap-2 dark:text-slate-200">
@@ -127,6 +132,27 @@ export function AdminCreateTaskForm({ employees }: { employees: Employee[] }) {
                 </select>
               </div>
 
+              {/* Role Dropdown (Filter) */}
+              <div className="space-y-2">
+                <Label htmlFor="role_filter" className="flex items-center gap-2 dark:text-slate-200">
+                  <Users className="w-4 h-4 text-[#0066FF]" />
+                  Filter by Role
+                </Label>
+                <select
+                  id="role_filter"
+                  value={selectedDesignation}
+                  onChange={(e) => setSelectedDesignation(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 outline-none focus:ring-2 focus:ring-[#0066FF]/20 transition-all text-sm font-medium text-slate-700 dark:text-slate-300"
+                >
+                  <option value="">All Roles</option>
+                  {uniqueDesignations.map((role) => (
+                    <option key={role} value={role}>
+                      {role}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               {/* Employee Dropdown */}
               <div className="space-y-2">
                 <Label htmlFor="assigned_employee_id" className="flex items-center gap-2 dark:text-slate-200">
@@ -142,7 +168,7 @@ export function AdminCreateTaskForm({ employees }: { employees: Employee[] }) {
                   <option value="" disabled>Select an employee...</option>
                   {filteredEmployees.map((emp) => (
                     <option key={emp.id} value={emp.id}>
-                      {emp.employee_name} ({emp.employee_code})
+                      {emp.employee_name} ({emp.employee_code}) {emp.designation ? `- ${emp.designation}` : ''}
                     </option>
                   ))}
                 </select>
