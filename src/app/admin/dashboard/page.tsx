@@ -140,7 +140,7 @@ export default async function AdminDashboard(props: { searchParams: Promise<{ [k
   const taskChartData = (departments || []).filter(d => dept_id ? d.id === dept_id : true).map(dept => {
     const deptTasks = tasks?.filter(t => t.department_id === dept.id) || []
     return {
-      name: dept.department_name.substring(0, 3).toUpperCase(),
+      name: (dept.department_name || '').substring(0, 3).toUpperCase(),
       completed: deptTasks.filter(t => t.task_status === 'COMPLETED').length,
       pending: deptTasks.filter(t => ['PENDING', 'IN_PROGRESS', 'WAITING_APPROVAL'].includes(t.task_status)).length,
       delayed: deptTasks.filter(t => t.task_status === 'DELAYED').length
@@ -205,7 +205,7 @@ export default async function AdminDashboard(props: { searchParams: Promise<{ [k
                   const deptEmployees = globalEmployees?.filter(e => e.department_id === dept.id).length || 0
                   const deptAttendance = globalTodayAttendance.filter(a => a.department_id === dept.id).length || 0
                   const percent = deptEmployees > 0 ? Math.round((deptAttendance / deptEmployees) * 100) : 0
-                  const deptAvgScore = productivityScores?.filter(s => s.department_id === dept.id)
+                  const deptAvgScore = (productivityScores || []).filter(s => s.department_id === dept.id)
                     .reduce((sum, s, _, arr) => sum + (s.productivity_score ?? 0) / arr.length, 0) ?? 0
 
                   return (
@@ -216,7 +216,7 @@ export default async function AdminDashboard(props: { searchParams: Promise<{ [k
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-blue-600 font-black text-sm group-hover:border-blue-300">
-                          {dept.department_name.substring(0, 2).toUpperCase()}
+                          {(dept.department_name || '').substring(0, 2).toUpperCase()}
                         </div>
                         <div>
                           <p className="font-semibold text-slate-900">{dept.department_name}</p>
