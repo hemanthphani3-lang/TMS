@@ -118,14 +118,14 @@ export default async function DepartmentDashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
-        <AnalyticsCard title="Staff Count" value={totalEmployees} icon={Users} colorClass="text-indigo-600" bgClass="bg-indigo-50" />
-        <AnalyticsCard title="Present Today" value={presentCount} icon={CheckCircle2} colorClass="text-emerald-600" bgClass="bg-emerald-50" />
+        <AnalyticsCard title="Dept Workforce" value={totalEmployees} icon={Users} colorClass="text-indigo-600" bgClass="bg-indigo-50" delay={0} />
+        <AnalyticsCard title="Avg Working Hours" value={avgHoursDisplay} icon={Clock} colorClass="text-purple-600" bgClass="bg-purple-50" delay={1} />
         <AnalyticsCard title="Absent Today" value={absentCount} icon={XCircle} colorClass="text-red-600" bgClass="bg-red-50" />
         <AnalyticsCard title="Active Now" value={activeCount} icon={Activity} colorClass="text-blue-600" bgClass="bg-blue-50" />
         <AnalyticsCard title="Pending Logouts" value={pendingLogouts || 0} icon={Target} colorClass="text-amber-600" bgClass="bg-amber-50" />
         <AnalyticsCard title="Total Tasks" value={totalTasks} icon={Target} colorClass="text-slate-600" bgClass="bg-slate-100" />
-        <AnalyticsCard title="Completed" value={completedTasks} icon={CheckCircle2} colorClass="text-emerald-600" bgClass="bg-emerald-50" />
-        <AnalyticsCard title="Delayed Tasks" value={delayedTasks} icon={AlertCircle} colorClass="text-orange-600" bgClass="bg-orange-50" />
+        <AnalyticsCard title="Completed Tasks" value={completedTasks} icon={CheckCircle2} colorClass="text-emerald-600" bgClass="bg-emerald-50" delay={2} />
+        <AnalyticsCard title="Delayed Tasks" value={delayedTasks} icon={Clock} colorClass="text-amber-600" bgClass="bg-amber-50" delay={3} />
         <AnalyticsCard title="Pending Leaves" value={pendingLeaves || 0} icon={Clock} colorClass="text-purple-600" bgClass="bg-purple-50" />
         <AnalyticsCard title="Dept Avg Score" value={`${avgScore.toFixed(0)}`} icon={Activity} colorClass="text-teal-600" bgClass="bg-teal-50" />
       </div>

@@ -181,8 +181,8 @@ export default async function AdminDashboard(props: { searchParams: Promise<{ [k
         <>
           {/* Org-level summary cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <AnalyticsCard title="Total Departments" value={totalDepartments} icon={Building2} colorClass="text-[#0066FF]" bgClass="bg-blue-50" />
-            <AnalyticsCard title="Total Workforce" value={globalEmployees?.length || 0} icon={Users} colorClass="text-indigo-600" bgClass="bg-indigo-50" />
+            <AnalyticsCard title="Total Departments" value={totalDepartments} icon={Building2} colorClass="text-[#0066FF]" bgClass="bg-blue-50" delay={0} />
+            <AnalyticsCard title="Total Workforce" value={globalEmployees?.length || 0} icon={Users} colorClass="text-indigo-600" bgClass="bg-indigo-50" delay={1} />
             <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Org Productivity</p>
               <p className="text-3xl font-black text-[#0A1A2F]">{orgProductivity.toFixed(0)}</p>
@@ -247,8 +247,8 @@ export default async function AdminDashboard(props: { searchParams: Promise<{ [k
             <AnalyticsCard title="Active Sessions" value={activeSessions} icon={Activity} colorClass="text-blue-600" bgClass="bg-blue-50" />
             <AnalyticsCard title="Pending Logouts" value={pendingLogouts || 0} icon={Target} colorClass="text-amber-600" bgClass="bg-amber-50" />
             <AnalyticsCard title="Total Tasks" value={totalTasks} icon={Building2} colorClass="text-slate-600" bgClass="bg-slate-100" />
-            <AnalyticsCard title="Completed" value={completedTasks} icon={CheckCircle2} colorClass="text-emerald-600" bgClass="bg-emerald-50" />
-            <AnalyticsCard title="Delayed Tasks" value={delayedTasks} icon={Clock} colorClass="text-orange-600" bgClass="bg-orange-50" />
+            <AnalyticsCard title="Tasks Completed" value={completedTasks} icon={CheckCircle2} colorClass="text-emerald-600" bgClass="bg-emerald-50" delay={2} />
+            <AnalyticsCard title="Tasks Delayed" value={delayedTasks} icon={Clock} colorClass="text-amber-600" bgClass="bg-amber-50" delay={3} />
             <AnalyticsCard title="Avg Work Hours" value={avgHoursDisplay} icon={Clock} colorClass="text-purple-600" bgClass="bg-purple-50" />
             <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Dept Score</p>
