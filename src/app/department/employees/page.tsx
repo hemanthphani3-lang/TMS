@@ -16,11 +16,31 @@ export default async function DepartmentEmployeesPage() {
   }
   if (!user) redirect('/login')
 
-  // RLS ensures the department can only fetch their own employees
-  const { data: employees } = await supabase
-    .from('employees')
-    .select('*')
-    .order('created_at', { ascending: false })
+  // IST-aware today window
+  const now = new Date()
+  const istOffset = 5.5 * 60 * 60 * 1000
+  const todayIST = new Date(now.getTime() + istOffset).toISOString().split('T')[0]
+  const startUTC = new Date(`${todayIST}T00:00:00+05:30`).toISOString()
+  const endUTC = new Date(`${todayIST}T23:59:59+05:30`).toISOString()
+
+  // Fetch employees and today's attendance concurrently
+  const [{ data: employees }, { data: todayAttendance }, { data: pendingLogouts }] = await Promise.all([
+    supabase.from('employees').select('*').order('created_at', { ascending: false }),
+    supabase.from('attendance').select('employee_id, work_status').gte('created_at', startUTC).lte('created_at', endUTC),
+    supabase.from('logout_requests').select('employee_id').eq('attendance_date', todayIST).eq('approval_status', 'PENDING')
+  ])
+
+  // Build lookup maps for fast access
+  const attendanceMap = new Map(todayAttendance?.map(a => [a.employee_id, a.work_status]))
+  const pendingLogoutSet = new Set(pendingLogouts?.map(r => r.employee_id))
+
+  const getLiveStatus = (empId: string) => {
+    if (pendingLogoutSet.has(empId)) return 'PENDING LOGOUT'
+    const ws = attendanceMap.get(empId)
+    if (!ws) return 'NOT CHECKED IN'
+    if (ws === 'LOGGED_OUT') return 'LOGGED OUT'
+    return 'ACTIVE'
+  }
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-4 sm:p-8">
@@ -45,7 +65,7 @@ export default async function DepartmentEmployeesPage() {
             <p className="text-slate-500 mb-6 max-w-sm mx-auto">Get started by creating your first employee account to grant them access to the platform.</p>
             <Link 
               href="/department/employees/create" 
-              className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl font-medium transition-colors"
+              className="inline-flex items-center gap-2 bg-[#0066FF] hover:bg-[#0052CC] text-white px-4 py-2.5 rounded-xl font-medium transition-colors"
             >
               <Plus className="w-4 h-4" />
               <span>Create Employee</span>
@@ -62,7 +82,7 @@ export default async function DepartmentEmployeesPage() {
                 email={emp.employee_email}
                 designation={emp.designation}
                 phone={emp.phone_number}
-                status={emp.account_status}
+                status={getLiveStatus(emp.id)}
                 photo={emp.profile_photo}
               />
             ))}
