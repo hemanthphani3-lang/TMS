@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
 import { LogOut, LayoutDashboard, Building2, Users, User, Calendar, ListTodo, Menu, X, FileText } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
+import { ThemeSwitcher } from "@/components/custom/ThemeSwitcher"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { useState } from "react"
@@ -116,7 +117,12 @@ export function Sidebar({ title, links, onLogoutClick }: SidebarProps) {
       </div>
 
       {/* Footer Area */}
-      <div className="p-4 border-t border-slate-100 space-y-2">
+      <div className="p-4 border-t border-slate-100 space-y-4">
+        
+        <div className="flex items-center justify-between px-3 py-1">
+          <span className="text-sm font-medium text-slate-500">Theme</span>
+          <ThemeSwitcher />
+        </div>
 
         <button
           onClick={handleLogout}

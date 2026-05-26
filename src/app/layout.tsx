@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { RealtimeListener } from "@/components/custom/RealtimeListener";
+import { ThemeProvider } from "@/components/custom/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,10 +28,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-[#F8FAFC] text-slate-900 transition-colors duration-300`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-[#F8FAFC] dark:bg-[#0A1A2F] text-slate-900 dark:text-slate-100 transition-colors duration-300`}
       >
-        <RealtimeListener />
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <RealtimeListener />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
