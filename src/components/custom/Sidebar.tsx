@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
-import { LogOut, LayoutDashboard, Building2, Users, User, Calendar, ListTodo, Menu, X, FileText } from "lucide-react"
+import { LogOut, LayoutDashboard, Building2, Users, User, Calendar, ListTodo, Menu, X, FileText, Bell } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 
 import { useRouter } from "next/navigation"
@@ -18,6 +18,7 @@ const iconMap: Record<string, React.ElementType> = {
   calendar: Calendar,
   tasks: ListTodo,
   file: FileText,
+  bell: Bell,
 }
 
 interface SidebarProps {
