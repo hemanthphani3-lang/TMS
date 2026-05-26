@@ -15,7 +15,7 @@ export default async function AdminEmployeesPage() {
 
   const { data: employees, error } = await supabase
     .from("employees")
-    .select("*, departments(department_name)")
+    .select("*, departments!department_id(department_name)")
     .order("created_at", { ascending: false })
 
   if (error) {
