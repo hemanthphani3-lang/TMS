@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card'
 import { FileText, FileSpreadsheet, Download, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import * as XLSX from 'xlsx'
-import jsPDF from 'jspdf'
+import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
 type ExportFormat = 'PDF' | 'EXCEL' | 'CSV'
@@ -77,7 +77,7 @@ export function ReportExportModal({ role, departmentId, employeeId }: ReportExpo
         }))
       }
       else if (type === 'TASKS') {
-        let query = supabase.from('tasks').select('*, employees(employee_name, employee_code), departments(department_name)').gte('created_at', startDate.toISOString())
+        let query = supabase.from('tasks').select('*, employees!assigned_employee_id(employee_name, employee_code), departments!department_id(department_name)').gte('created_at', startDate.toISOString())
         if (role === 'DEPARTMENT' && departmentId) query = query.eq('department_id', departmentId)
         if (role === 'EMPLOYEE' && employeeId) query = query.eq('assigned_employee_id', employeeId)
         
