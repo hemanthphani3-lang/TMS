@@ -8,17 +8,17 @@ import { RealtimeLeaderboard } from "@/components/productivity/RealtimeLeaderboa
 import { ProductivityBadge } from "@/components/productivity/ProductivityBadge"
 
 export default async function DepartmentDashboard() {
+  // ── Auth ──────────────────────────────────────────────────────────────────
+  const supabase = await createClient()
+  let user = null
   try {
-    const supabase = await createClient()
-    let user = null
-    try {
-      const { data } = await supabase.auth.getUser()
-      user = data.user
-    } catch (e) {}
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch (_e) {}
 
-    if (!user) redirect("/login")
+  if (!user) redirect("/login")
 
-  // Fetch today's attendance variables for queries
+  // ── Data Fetching ─────────────────────────────────────────────────────────
   const today = new Date().toISOString().split('T')[0]
   const last7Days = Array.from({ length: 7 }).map((_, i) => {
     const d = new Date()
@@ -26,7 +26,6 @@ export default async function DepartmentDashboard() {
     return d.toISOString().split('T')[0]
   }).reverse()
 
-  // Execute all independent queries concurrently to drastically reduce page load time
   const [
     { data: employees },
     { data: attendance },
@@ -37,16 +36,17 @@ export default async function DepartmentDashboard() {
     { data: productivityScores },
     { data: rankings }
   ] = await Promise.all([
-    supabase.from('employees').select('id, employee_name, designation, profile_photo').eq('department_id', user.id),
-    supabase.from('attendance').select('employee_id, attendance_status, check_in_time, work_status, working_hours, created_at').eq('department_id', user.id).gte('created_at', `${last7Days[0]}T00:00:00Z`).lte('created_at', `${today}T23:59:59Z`),
-    supabase.from('logout_requests').select('*', { count: 'exact', head: true }).eq('department_id', user.id).eq('approval_status', 'PENDING'),
-    supabase.from('leave_requests').select('*', { count: 'exact', head: true }).eq('department_id', user.id).eq('approval_status', 'PENDING'),
-    supabase.from('tasks').select('id, task_status, assigned_employee_id').eq('department_id', user.id),
-    supabase.from('activity_feed').select('*').eq('department_id', user.id).order('created_at', { ascending: false }).limit(10),
-    supabase.from('productivity_scores').select('employee_id, productivity_score').eq('department_id', user.id).order('productivity_score', { ascending: false }),
-    supabase.from('rankings').select('employee_id, employee_rank, score').eq('department_id', user.id)
+    supabase.from('employees').select('id, employee_name, designation, profile_photo').eq('department_id', user!.id),
+    supabase.from('attendance').select('employee_id, attendance_status, check_in_time, work_status, working_hours, created_at').eq('department_id', user!.id).gte('created_at', `${last7Days[0]}T00:00:00Z`).lte('created_at', `${today}T23:59:59Z`),
+    supabase.from('logout_requests').select('*', { count: 'exact', head: true }).eq('department_id', user!.id).eq('approval_status', 'PENDING'),
+    supabase.from('leave_requests').select('*', { count: 'exact', head: true }).eq('department_id', user!.id).eq('approval_status', 'PENDING'),
+    supabase.from('tasks').select('id, task_status, assigned_employee_id').eq('department_id', user!.id),
+    supabase.from('activity_feed').select('*').eq('department_id', user!.id).order('created_at', { ascending: false }).limit(10),
+    supabase.from('productivity_scores').select('employee_id, productivity_score').eq('department_id', user!.id).order('productivity_score', { ascending: false }),
+    supabase.from('rankings').select('employee_id, employee_rank, score').eq('department_id', user!.id)
   ])
 
+  // ── Computed Stats ────────────────────────────────────────────────────────
   const totalEmployees = employees?.length || 0
 
   const rawTodayAttendance = attendance?.filter(a => a.created_at.startsWith(today)) || []
@@ -57,40 +57,38 @@ export default async function DepartmentDashboard() {
   const totalCheckedIn = presentCount + lateCount
   const absentCount = totalEmployees - totalCheckedIn
   const activeCount = todayAttendance.filter(a => a.work_status === 'ACTIVE' || a.work_status === 'LOGOUT_REQUESTED').length || 0
-
   const attendancePercentage = totalEmployees > 0 ? Math.round((totalCheckedIn / totalEmployees) * 100) : 0
 
   const totalTasks = tasks?.length || 0
   const completedTasks = tasks?.filter(t => t.task_status === 'COMPLETED').length || 0
   const delayedTasks = tasks?.filter(t => t.task_status === 'DELAYED').length || 0
 
+  // Avg working hours
   const loggedOutWithHours = todayAttendance.filter(a => a.work_status === 'LOGGED_OUT' && a.working_hours)
   let avgHoursDisplay = "0h 0m"
   if (loggedOutWithHours.length > 0) {
     let totalMins = 0
     loggedOutWithHours.forEach(record => {
-      const parts = record.working_hours.match(/(\d+)h\s*(\d+)m/)
-      if (parts) {
-        totalMins += parseInt(parts[1]) * 60 + parseInt(parts[2])
-      }
+      const parts = (record.working_hours as string).match(/(\d+)h\s*(\d+)m/)
+      if (parts) totalMins += parseInt(parts[1]) * 60 + parseInt(parts[2])
     })
     const avgMins = Math.floor(totalMins / loggedOutWithHours.length)
     avgHoursDisplay = `${Math.floor(avgMins / 60)}h ${avgMins % 60}m`
   }
 
-  // Chart Data
+  // Chart data
   const attendanceChartData = last7Days.map(date => {
     const dayRecordsRaw = attendance?.filter(a => a.created_at.startsWith(date)) || []
     const dayRecords = Array.from(new Map(dayRecordsRaw.map(a => [a.employee_id, a])).values())
     const present = dayRecords.filter(a => ['PRESENT', 'HALF_DAY', 'LATE'].includes(a.attendance_status)).length
     return {
       date: new Date(date).toLocaleDateString('en-US', { weekday: 'short' }),
-      present: present,
+      present,
       absent: Math.max(0, totalEmployees - present)
     }
   })
 
-  // Build initial leaderboard entries (for SSR first paint)
+  // Leaderboard
   const leaderboardEntries = (productivityScores || [])
     .map((score, idx) => {
       const emp = employees?.find(e => e.id === score.employee_id)
@@ -106,15 +104,16 @@ export default async function DepartmentDashboard() {
     })
     .sort((a, b) => a.rank - b.rank)
 
-  // Identify delayed employees 
+  // Delayed employees
   const delayedEmployeeIds = [...new Set((tasks || []).filter(t => t.task_status === 'DELAYED').map(t => t.assigned_employee_id))]
   const delayedEmployees = employees?.filter(e => delayedEmployeeIds.includes(e.id)) || []
 
-  // Avg productivity score for dept
+  // Avg productivity score
   const avgScore = productivityScores && productivityScores.length > 0
     ? productivityScores.reduce((sum, s) => sum + (s.productivity_score ?? 0), 0) / productivityScores.length
     : 0
 
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="p-4 sm:p-6 md:p-8 pb-20">
       <header className="mb-8 flex justify-between items-end">
@@ -269,7 +268,7 @@ export default async function DepartmentDashboard() {
         {/* Right col: Leaderboard + Activity */}
         <div className="space-y-8">
           <RealtimeLeaderboard
-            departmentId={user.id}
+            departmentId={user!.id}
             initialEntries={leaderboardEntries.slice(0, 10)}
             employees={employees || []}
             title="Team Leaderboard"
@@ -279,16 +278,4 @@ export default async function DepartmentDashboard() {
       </div>
     </div>
   )
-  } catch (error: any) {
-    return (
-      <div className="p-8 max-w-4xl mx-auto bg-red-50 text-red-900 border border-red-200 rounded-xl mt-8">
-        <h2 className="text-2xl font-bold mb-4">Server Component Crash (Raw)</h2>
-        <div className="bg-white p-4 rounded border border-red-100 overflow-auto text-sm font-mono whitespace-pre-wrap">
-          {error?.message || String(error)}
-          <br /><br />
-          {error?.stack}
-        </div>
-      </div>
-    )
-  }
 }
