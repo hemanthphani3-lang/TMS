@@ -33,13 +33,16 @@ export async function requestLogoutAndSubmitWork(formData: FormData) {
   const endUTC = new Date(`${todayIST}T23:59:59+05:30`).toISOString()
   const today = todayIST
 
-  const { data: attendance } = await supabase
+  const { data: attendances } = await supabase
     .from('attendance')
     .select('id, check_in_time, work_status')
     .eq('employee_id', user.id)
     .gte('created_at', startUTC)
     .lte('created_at', endUTC)
-    .maybeSingle()
+    .order('created_at', { ascending: false })
+    .limit(1)
+
+  const attendance = attendances?.[0]
 
   if (!attendance) {
     return { success: false, error: "You have not checked in today." }
